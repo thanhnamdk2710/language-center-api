@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package health;
+option go_package = "internal/delivery/grpc/proto_gen;proto_gen";
+
+// Simple health check service
+service HealthService {
+    rpc Check (HealthRequest) returns (HealthReponse);
+}
+
+message HealthRequest {}
+
+message HealthReponse {
+    string status = 1;
+    string message = 2;
+}
