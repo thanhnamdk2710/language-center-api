@@ -14,6 +14,7 @@ FROM alpine:3.19
 
 WORKDIR /app
 COPY --from=builder /app/auth-service .
+COPY migrations /app/migrations
 COPY .env .
 
 EXPOSE 8080 50051
