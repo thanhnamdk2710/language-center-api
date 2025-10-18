@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  # -------------------
+  # Postgres Database
+  # -------------------
+  db:
+    image: postgres:15-alpine
+    container_name: auth_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - ./migrations:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # -------------------
+  # Redis Cache
+  # -------------------
+  redis:
+    image: redis:7-alpine
+    container_name: auth_redis
+    restart: always
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # -------------------
+  # Auth Service
+  # -------------------
+  auth-service:
+    build: .
+    container_name: auth_service
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "${GRPC_PORT}:${GRPC_PORT}"
+    env_file: .env
+    command: ["/app/auth-service"]
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
