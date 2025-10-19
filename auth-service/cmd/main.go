@@ -9,6 +9,7 @@ import (
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/grpc"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/http"
 	"github.com/thanhnamdk2710/auth-service/internal/repository/postgres"
+	"github.com/thanhnamdk2710/auth-service/internal/repository/redis"
 	"github.com/thanhnamdk2710/auth-service/internal/utils"
 )
 
@@ -27,6 +28,13 @@ func main() {
 	if err := postgres.RunMigrations(&cfg.Postgres); err != nil {
 		log.Fatalf("Migration failed: %v", err)
 	}
+
+	// Connect Redis
+	redis, err := redis.NewRedisClient(&cfg.Redis)
+	if err != nil {
+		log.Fatalf("Redis connection failed: %v", err)
+	}
+	defer redis.Close()
 
 	var wg sync.WaitGroup
 	wg.Add(2)
