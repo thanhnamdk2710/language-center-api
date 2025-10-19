@@ -40,24 +40,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # -------------------
-  # Auth Service
-  # -------------------
-  auth-service:
-    build: .
-    container_name: auth_service
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    ports:
-      - "${HTTP_PORT}:${HTTP_PORT}"
-      - "${GRPC_PORT}:${GRPC_PORT}"
-    env_file: .env
-    command: ["/app/auth-service"]
-    restart: unless-stopped
-
 volumes:
   postgres_data:
   redis_data:

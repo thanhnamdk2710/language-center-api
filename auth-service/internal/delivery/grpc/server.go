@@ -6,7 +6,7 @@ import (
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/grpc/proto_gen"
-	"github.com/thanhnamdk2710/auth-service/internal/utils"
+	"github.com/thanhnamdk2710/auth-service/internal/utils/logger"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -28,7 +28,7 @@ func StartGRPCServer(cfg *config.Config) {
 	addr := fmt.Sprintf(":%s", cfg.GRPCPort)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		utils.Error("Failed to listen on gRPC port", err)
+		logger.Error("Failed to listen on gRPC port", err)
 		return
 	}
 
@@ -37,8 +37,8 @@ func StartGRPCServer(cfg *config.Config) {
 
 	reflection.Register(s)
 
-	utils.Info(fmt.Sprintf("gRPC server running on %s", addr))
+	logger.Info(fmt.Sprintf("gRPC server running on %s", addr))
 	if err := s.Serve(lis); err != nil {
-		utils.Error("Failed to serve gRPC", err)
+		logger.Error("Failed to serve gRPC", err)
 	}
 }

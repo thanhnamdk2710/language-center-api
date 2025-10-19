@@ -8,7 +8,7 @@ import (
 	_ "github.com/lib/pq" // PostgreSQL driver
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/utils"
+	"github.com/thanhnamdk2710/auth-service/internal/utils/logger"
 )
 
 type Database struct {
@@ -36,6 +36,6 @@ func NewPostgresDB(cfg *config.PostgresConfig) (*Database, error) {
 		return nil, fmt.Errorf("failed to ping postgres: %w", err)
 	}
 
-	utils.Info("Connected to PostgreSQL successfully")
+	logger.Info("Connected to PostgreSQL successfully")
 	return &Database{Conn: db}, nil
 }

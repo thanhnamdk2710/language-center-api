@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
@@ -10,29 +9,31 @@ import (
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/http"
 	"github.com/thanhnamdk2710/auth-service/internal/repository/postgres"
 	"github.com/thanhnamdk2710/auth-service/internal/repository/redis"
-	"github.com/thanhnamdk2710/auth-service/internal/utils"
+	"github.com/thanhnamdk2710/auth-service/internal/utils/logger"
 )
 
 func main() {
 	cfg := config.Load()
-	utils.Info(fmt.Sprintf("Starting %s...", cfg.AppName))
+	logger.InitLogger(cfg.AppName, "dev")
+
+	logger.Info(fmt.Sprintf("Starting %s...", cfg.AppName))
 
 	// Connect Database
 	db, err := postgres.NewPostgresDB(&cfg.Postgres)
 	if err != nil {
-		log.Fatalf("Database connection failed: %v", err)
+		logger.Fatal("Database connection failed", err)
 	}
 	defer db.Conn.Close()
 
 	// Run migration
 	if err := postgres.RunMigrations(&cfg.Postgres); err != nil {
-		log.Fatalf("Migration failed: %v", err)
+		logger.Fatal("Migration failed", err)
 	}
 
 	// Connect Redis
 	redis, err := redis.NewRedisClient(&cfg.Redis)
 	if err != nil {
-		log.Fatalf("Redis connection failed: %v", err)
+		logger.Fatal("Redis connection failed", err)
 	}
 	defer redis.Close()
 
@@ -46,10 +47,10 @@ func main() {
 		r := http.NewRouter()
 
 		addr := fmt.Sprintf(":%s", cfg.HTTPPort)
-		utils.Info(fmt.Sprintf("HTTP server running on %s", addr))
+		logger.Info(fmt.Sprintf("HTTP server running on %s", addr))
 
 		if err := r.Run(addr); err != nil {
-			log.Fatalf("Failed to start server: %v", err)
+			logger.Fatal("Failed to start server", err)
 		}
 	}()
 

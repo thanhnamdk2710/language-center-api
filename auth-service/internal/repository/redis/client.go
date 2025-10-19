@@ -7,7 +7,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/utils"
+	"github.com/thanhnamdk2710/auth-service/internal/utils/logger"
 )
 
 type RedisClient struct {
@@ -31,7 +31,7 @@ func NewRedisClient(cfg *config.RedisConfig) (*RedisClient, error) {
 		return nil, fmt.Errorf("failed to connect redis: %w", err)
 	}
 
-	utils.Info("Connected to Redis successfully")
+	logger.Info("Connected to Redis successfully")
 	return &RedisClient{Client: rdb, TTL: time.Duration(cfg.TTL) * time.Second}, nil
 }
 

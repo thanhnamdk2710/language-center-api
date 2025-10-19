@@ -41,7 +41,7 @@ clean:
 .PHONY: docker-up
 docker-up:
 	@echo "Starting Docker Compose..."
-	@docker compose up --build
+	@docker compose up -d --build
 
 .PHONY: docker-down
 docker-down:
