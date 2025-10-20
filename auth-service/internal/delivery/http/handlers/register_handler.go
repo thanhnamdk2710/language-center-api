@@ -1,13 +1,16 @@
-package handlers
+package handler
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/dto"
 	response "github.com/thanhnamdk2710/auth-service/internal/delivery/http/responses"
 	"github.com/thanhnamdk2710/auth-service/internal/domain"
 	usecase "github.com/thanhnamdk2710/auth-service/internal/usecases/register"
 	"github.com/thanhnamdk2710/auth-service/internal/utils/password"
+	"github.com/thanhnamdk2710/auth-service/internal/utils/validation"
 )
 
 type RegisterHandler struct {
@@ -20,39 +23,32 @@ func NewAuthHandler(usecase usecase.RegisterUsecase) *RegisterHandler {
 	}
 }
 
-type RegisterRequest struct {
-	Email           string `json:"email" binding:"required,email"`
-	Password        string `json:"password" binding:"required,min=8,max=64"`
-	PasswordConfirm string `json:"password_confim" binding:"required,min=8,max=64,eqfield=Password"`
-}
-
-func (r *RegisterRequest) Validate() error {
-	ps := password.PasswordService{}
-	if err := ps.Validate(r.Password); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (h RegisterHandler) Register(c *gin.Context) {
-	var req RegisterRequest
+	var req dto.RegisterRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, http.StatusBadRequest, "INPUT_INVALID", err.Error())
+		if verrs, ok := err.(validator.ValidationErrors); ok {
+			errors := validation.ConvertValidationErrors(verrs)
+			response.Error(c, http.StatusBadRequest, "INPUT_INVALID", errors)
+			return
+		}
+
+		response.Error(c, http.StatusBadRequest, "INPUT_INVALID", "Invalid request body format")
 		return
 	}
 
-	if err := req.Validate(); err != nil {
-		response.Error(c, http.StatusBadRequest, "EMAIL_INVALID", err.Error())
+	passwordHash, err := password.HashPassword(req.Password)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "PASSWORD_INVALID", err.Error())
 		return
 	}
 
 	user := &domain.User{
 		Email:        req.Email,
-		PasswordHash: req.Password,
+		PasswordHash: passwordHash,
 	}
 
-	err := h.usecase.Register(c.Request.Context(), user)
+	err = h.usecase.Register(c.Request.Context(), user)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "SERVER_ERROR", err.Error())
 		return

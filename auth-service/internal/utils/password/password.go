@@ -7,11 +7,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type PasswordService struct{}
-
-func (s *PasswordService) HashPassword(password string) (string, error) {
+func HashPassword(password string) (string, error) {
 	// Validate password
-	if err := s.Validate(password); err != nil {
+	if err := Validate(password); err != nil {
 		return "", err
 	}
 
@@ -27,7 +25,7 @@ func (s *PasswordService) HashPassword(password string) (string, error) {
 	return string(hash), nil
 }
 
-func (s *PasswordService) Validate(password string) error {
+func Validate(password string) error {
 	// Check for required character types
 	var (
 		hasUpper   bool

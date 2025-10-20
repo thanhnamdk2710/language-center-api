@@ -1,29 +1,32 @@
 package http
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/handlers"
+	handler "github.com/thanhnamdk2710/auth-service/internal/delivery/http/handlers"
 	usecase "github.com/thanhnamdk2710/auth-service/internal/usecases/register"
 )
 
 func NewRouter() *gin.Engine {
 	r := gin.Default()
+	r.Use(gin.Logger(), gin.Recovery())
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
+	// Health check handler
+	r.GET("/health", handler.HealthCheck())
 
-	v1 := r.Group("/api/v1")
-	{
-		auth := v1.Group("/auth")
-		{
-			registerUsecase := usecase.NewRegisterUsecase()
-			registerHandler := handlers.NewAuthHandler(registerUsecase)
-			auth.POST("/register", registerHandler.Register)
-		}
-	}
+	// Init all route groups
+	api := r.Group("/api/v1")
+	initAuthRoutes(api)
 
 	return r
+}
+
+func initAuthRoutes(router *gin.RouterGroup) {
+	authGroup := router.Group("auth")
+
+	// Dependency injection
+	registerUsecase := usecase.NewRegisterUsecase()
+	registerHandler := handler.NewAuthHandler(registerUsecase)
+
+	// Apis
+	authGroup.POST("/register", registerHandler.Register)
 }

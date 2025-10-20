@@ -101,5 +101,11 @@ lint: ## Run static code analysis
 .PHONY: format
 format: ## Format codebase with gofmt
 	@echo "Formatting code..."
+	@goimports -w .
 	@gofmt -s -w .
+	@go vet ./...
 	@echo "Code formatting."
+
+.PHONY: check
+check:
+	make format && make lint

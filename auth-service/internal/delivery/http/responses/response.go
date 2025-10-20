@@ -12,7 +12,7 @@ func Success(c *gin.Context, status int, data interface{}) {
 }
 
 // Error response
-func Error(c *gin.Context, status int, code, message interface{}) {
+func Error(c *gin.Context, status int, code string, message interface{}) {
 	c.JSON(status, gin.H{
 		"error": gin.H{
 			"code":    code,
