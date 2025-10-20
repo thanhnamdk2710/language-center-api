@@ -2,11 +2,20 @@ package domain
 
 import "time"
 
+type UserStatus string
+
+const (
+	UserStatusPending  UserStatus = "pending"
+	UserStatusActive   UserStatus = "active"
+	UserStatusDisabled UserStatus = "disabled"
+)
+
 type User struct {
-	ID        string
-	Email     string
-	Password  string
-	Role      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID              string
+	Email           string
+	PasswordHash    string
+	Status          UserStatus
+	EmailVerifiedAt *time.Time
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
