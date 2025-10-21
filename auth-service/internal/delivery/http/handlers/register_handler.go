@@ -5,12 +5,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/dto"
-	response "github.com/thanhnamdk2710/auth-service/internal/delivery/http/responses"
 	"github.com/thanhnamdk2710/auth-service/internal/domain"
-	usecase "github.com/thanhnamdk2710/auth-service/internal/usecases/register"
-	"github.com/thanhnamdk2710/auth-service/internal/utils/password"
-	"github.com/thanhnamdk2710/auth-service/internal/utils/validation"
+	"github.com/thanhnamdk2710/auth-service/internal/dto"
+	"github.com/thanhnamdk2710/auth-service/internal/shared/password"
+	response "github.com/thanhnamdk2710/auth-service/internal/shared/responses"
+	"github.com/thanhnamdk2710/auth-service/internal/shared/validation"
+	usecase "github.com/thanhnamdk2710/auth-service/internal/usecase/register"
 )
 
 type RegisterHandler struct {

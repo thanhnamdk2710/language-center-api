@@ -3,7 +3,7 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	handler "github.com/thanhnamdk2710/auth-service/internal/delivery/http/handlers"
-	usecase "github.com/thanhnamdk2710/auth-service/internal/usecases/register"
+	usecase "github.com/thanhnamdk2710/auth-service/internal/usecase/register"
 )
 
 func NewRouter() *gin.Engine {

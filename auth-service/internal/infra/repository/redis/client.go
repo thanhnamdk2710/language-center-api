@@ -7,7 +7,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/utils/logger"
+	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 
 type RedisClient struct {

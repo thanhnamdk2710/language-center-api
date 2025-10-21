@@ -6,7 +6,7 @@ import (
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/grpc/proto_gen"
-	"github.com/thanhnamdk2710/auth-service/internal/utils/logger"
+	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

@@ -8,7 +8,7 @@ import (
 	_ "github.com/lib/pq" // PostgreSQL driver
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/utils/logger"
+	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 
 type Database struct {

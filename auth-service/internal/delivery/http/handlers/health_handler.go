@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	response "github.com/thanhnamdk2710/auth-service/internal/delivery/http/responses"
+	response "github.com/thanhnamdk2710/auth-service/internal/shared/responses"
 )
 
 func HealthCheck() gin.HandlerFunc {

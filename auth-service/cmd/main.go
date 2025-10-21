@@ -7,9 +7,9 @@ import (
 	"github.com/thanhnamdk2710/auth-service/internal/config"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/grpc"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/http"
-	"github.com/thanhnamdk2710/auth-service/internal/repository/postgres"
-	"github.com/thanhnamdk2710/auth-service/internal/repository/redis"
-	"github.com/thanhnamdk2710/auth-service/internal/utils/logger"
+	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/postgres"
+	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/redis"
+	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 
 func main() {

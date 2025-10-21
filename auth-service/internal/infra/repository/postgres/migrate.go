@@ -8,7 +8,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/utils/logger"
+	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 
 func RunMigrations(cfg *config.PostgresConfig) error {
