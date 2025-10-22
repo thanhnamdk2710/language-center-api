@@ -6,7 +6,7 @@ import (
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/grpc"
-	"github.com/thanhnamdk2710/auth-service/internal/delivery/http"
+	httpDelivery "github.com/thanhnamdk2710/auth-service/internal/delivery/http"
 	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/postgres"
 	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/redis"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
@@ -44,7 +44,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 
-		r := http.NewRouter()
+		r := httpDelivery.NewRouter()
 
 		addr := fmt.Sprintf(":%s", cfg.HTTPPort)
 		logger.Info(fmt.Sprintf("HTTP server running on %s", addr))

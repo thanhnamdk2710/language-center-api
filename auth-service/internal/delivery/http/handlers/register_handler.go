@@ -1,41 +1,28 @@
-package handler
+package handlers
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
+	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/dto"
 	"github.com/thanhnamdk2710/auth-service/internal/domain"
-	"github.com/thanhnamdk2710/auth-service/internal/dto"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/password"
-	response "github.com/thanhnamdk2710/auth-service/internal/shared/responses"
-	"github.com/thanhnamdk2710/auth-service/internal/shared/validation"
-	usecase "github.com/thanhnamdk2710/auth-service/internal/usecase/register"
+	"github.com/thanhnamdk2710/auth-service/internal/shared/response"
+	"github.com/thanhnamdk2710/auth-service/internal/usecase"
 )
 
 type RegisterHandler struct {
 	usecase usecase.RegisterUsecase
 }
 
-func NewAuthHandler(usecase usecase.RegisterUsecase) *RegisterHandler {
+func NewRegisterHandler(usecase usecase.RegisterUsecase) *RegisterHandler {
 	return &RegisterHandler{
 		usecase: usecase,
 	}
 }
 
 func (h RegisterHandler) Register(c *gin.Context) {
-	var req dto.RegisterRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		if verrs, ok := err.(validator.ValidationErrors); ok {
-			errors := validation.ConvertValidationErrors(verrs)
-			response.Error(c, http.StatusBadRequest, "INPUT_INVALID", errors)
-			return
-		}
-
-		response.Error(c, http.StatusBadRequest, "INPUT_INVALID", "Invalid request body format")
-		return
-	}
+	req := c.MustGet("requestBody").(dto.RegisterRequest)
 
 	passwordHash, err := password.HashPassword(req.Password)
 	if err != nil {
