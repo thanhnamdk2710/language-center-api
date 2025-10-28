@@ -1,8 +1,12 @@
 package modules
 
 import (
+	"database/sql"
+
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/handlers"
+	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/postgres"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase"
+	"github.com/thanhnamdk2710/auth-service/internal/usecase/register"
 )
 
 type AuthModule struct {
@@ -12,8 +16,10 @@ type AuthModule struct {
 	RefreshTokenHandler   *handlers.RefreshTokenHandler
 }
 
-func NewAuthModule() *AuthModule {
-	registerUC := usecase.NewRegisterUsecase()
+func NewAuthModule(db *sql.DB) *AuthModule {
+	userRepo := postgres.NewUserRepository(db)
+
+	registerUC := register.NewRegisterUsecase(userRepo)
 	loginUC := usecase.NewLoginUsecase()
 	forgotPasswordUC := usecase.NewForgotPasswordUsecase()
 	refreshTokenUC := usecase.NewRefreshTokenUsecase()

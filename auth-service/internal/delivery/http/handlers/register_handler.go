@@ -5,19 +5,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/dto"
-	"github.com/thanhnamdk2710/auth-service/internal/domain"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/password"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/response"
-	"github.com/thanhnamdk2710/auth-service/internal/usecase"
+	"github.com/thanhnamdk2710/auth-service/internal/usecase/register"
 )
 
 type RegisterHandler struct {
-	usecase usecase.RegisterUsecase
+	usecase register.Usecase
 }
 
-func NewRegisterHandler(usecase usecase.RegisterUsecase) *RegisterHandler {
+func NewRegisterHandler(u register.Usecase) *RegisterHandler {
 	return &RegisterHandler{
-		usecase: usecase,
+		usecase: u,
 	}
 }
 
@@ -30,12 +29,12 @@ func (h RegisterHandler) Register(c *gin.Context) {
 		return
 	}
 
-	user := &domain.User{
+	input := register.Input{
 		Email:        req.Email,
 		PasswordHash: passwordHash,
 	}
 
-	err = h.usecase.Register(c.Request.Context(), user)
+	err = h.usecase.Execute(c.Request.Context(), input)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "SERVER_ERROR", err.Error())
 		return

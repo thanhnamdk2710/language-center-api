@@ -44,7 +44,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 
-		r := httpDelivery.NewRouter()
+		r := httpDelivery.NewRouter(db.Conn)
 
 		addr := fmt.Sprintf(":%s", cfg.HTTPPort)
 		logger.Info(fmt.Sprintf("HTTP server running on %s", addr))

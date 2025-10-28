@@ -1,17 +1,19 @@
 package routes
 
 import (
+	"database/sql"
+
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/dto"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/middlewares"
 	"github.com/thanhnamdk2710/auth-service/internal/modules"
 )
 
-func initAuthRoutes(router *gin.RouterGroup) *gin.RouterGroup {
+func initAuthRoutes(router *gin.RouterGroup, db *sql.DB) *gin.RouterGroup {
 	auth := router.Group("auth")
 
 	// Dependency injection
-	authModule := modules.NewAuthModule()
+	authModule := modules.NewAuthModule(db)
 
 	// Apis
 	auth.POST("/register", middlewares.BindAndValidate[dto.RegisterRequest](), authModule.RegisterHandler.Register)
