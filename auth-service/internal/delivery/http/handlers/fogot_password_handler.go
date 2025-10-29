@@ -5,20 +5,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/response"
-	"github.com/thanhnamdk2710/auth-service/internal/usecase"
+	"github.com/thanhnamdk2710/auth-service/internal/usecase/forgot_password"
 )
 
 type ForgotPasswordHandler struct {
-	usecase usecase.ForgotPasswordUsecase
+	usecase forgot_password.Usecase
 }
 
-func NewForgotPasswordHandler(usecase usecase.ForgotPasswordUsecase) *ForgotPasswordHandler {
+func NewForgotPasswordHandler(u forgot_password.Usecase) *ForgotPasswordHandler {
 	return &ForgotPasswordHandler{
-		usecase: usecase,
+		usecase: u,
 	}
 }
 
-func (h ForgotPasswordHandler) ForgotPassword(c *gin.Context) {
+func (h *ForgotPasswordHandler) ForgotPassword(c *gin.Context) {
 	response.Success(c, http.StatusCreated, gin.H{
 		"message": "ForgotPassword",
 	})

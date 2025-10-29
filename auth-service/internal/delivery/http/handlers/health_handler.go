@@ -9,7 +9,7 @@ import (
 
 func HealthCheck() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		response.Success(c, http.StatusCreated, gin.H{
+		response.Success(c, http.StatusOK, gin.H{
 			"message": "OK",
 		})
 	}

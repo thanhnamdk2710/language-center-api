@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
+	"github.com/thanhnamdk2710/auth-service/internal/container"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/grpc"
 	httpDelivery "github.com/thanhnamdk2710/auth-service/internal/delivery/http"
 	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/postgres"
@@ -15,8 +16,6 @@ import (
 func main() {
 	cfg := config.Load()
 	logger.InitLogger(cfg.AppName, "dev")
-
-	logger.Info(fmt.Sprintf("Starting %s...", cfg.AppName))
 
 	// Connect Database
 	db, err := postgres.NewPostgresDB(&cfg.Postgres)
@@ -37,6 +36,9 @@ func main() {
 	}
 	defer redis.Close()
 
+	// Initialize container with all dependencies
+	container := container.NewContainer(db.Conn, cfg)
+
 	var wg sync.WaitGroup
 	wg.Add(2)
 
@@ -44,7 +46,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 
-		r := httpDelivery.NewRouter(db.Conn)
+		r := httpDelivery.NewRouter(container)
 
 		addr := fmt.Sprintf(":%s", cfg.HTTPPort)
 		logger.Info(fmt.Sprintf("HTTP server running on %s", addr))

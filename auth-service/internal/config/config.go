@@ -3,6 +3,8 @@ package config
 import (
 	"log"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -13,6 +15,8 @@ type Config struct {
 	GRPCPort string
 	Postgres PostgresConfig
 	Redis    RedisConfig
+	SMTP     SMTPConfig
+	JWT      JWTConfig
 }
 
 func Load() *Config {
@@ -28,6 +32,8 @@ func Load() *Config {
 		GRPCPort: viper.GetString("GRPC_PORT"),
 		Postgres: loadPostgresConfig(),
 		Redis:    loadRedisConfig(),
+		SMTP:     loadSMTPConfig(),
+		JWT:      loadJWTConfig(),
 	}
 }
 
@@ -37,6 +43,38 @@ func getString(key, def string) string {
 	}
 	if val := os.Getenv(key); val != "" {
 		return val
+	}
+	return def
+}
+
+func getBool(key string, def bool) bool {
+	if val := viper.GetString(key); val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err == nil {
+			return parsed
+		}
+	}
+	if val := os.Getenv(key); val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err == nil {
+			return parsed
+		}
+	}
+	return def
+}
+
+func getDuration(key string, def time.Duration) time.Duration {
+	if val := viper.GetString(key); val != "" {
+		parsed, err := time.ParseDuration(val)
+		if err == nil {
+			return parsed
+		}
+	}
+	if val := os.Getenv(key); val != "" {
+		parsed, err := time.ParseDuration(val)
+		if err == nil {
+			return parsed
+		}
 	}
 	return def
 }

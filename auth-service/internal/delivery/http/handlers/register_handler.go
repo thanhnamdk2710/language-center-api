@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/dto"
-	"github.com/thanhnamdk2710/auth-service/internal/shared/password"
+	"github.com/thanhnamdk2710/auth-service/internal/domain"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/response"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/register"
 )
@@ -20,27 +21,27 @@ func NewRegisterHandler(u register.Usecase) *RegisterHandler {
 	}
 }
 
-func (h RegisterHandler) Register(c *gin.Context) {
+func (h *RegisterHandler) Register(c *gin.Context) {
 	req := c.MustGet("requestBody").(dto.RegisterRequest)
 
-	passwordHash, err := password.HashPassword(req.Password)
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "PASSWORD_INVALID", err.Error())
-		return
-	}
-
 	input := register.Input{
-		Email:        req.Email,
-		PasswordHash: passwordHash,
+		Email:    req.Email,
+		Password: req.Password,
 	}
 
-	err = h.usecase.Execute(c.Request.Context(), input)
+	output, err := h.usecase.Execute(c.Request.Context(), input)
 	if err != nil {
+		// Map domain errors to HTTP errors
+		if errors.Is(err, domain.ErrUserAlreadyExists) {
+			response.Error(c, http.StatusConflict, "USER_EXISTS", err.Error())
+			return
+		}
 		response.Error(c, http.StatusInternalServerError, "SERVER_ERROR", err.Error())
 		return
 	}
 
 	response.Success(c, http.StatusCreated, gin.H{
+		"user_id": output.UserID,
 		"message": "User registered successfully",
 	})
 }

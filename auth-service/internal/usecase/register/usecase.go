@@ -8,41 +8,55 @@ import (
 )
 
 type Usecase interface {
-	Execute(ctx context.Context, input Input) error
+	Execute(ctx context.Context, input Input) (*Output, error)
 }
 
-type serivce struct {
-	userRepo domain.UserRepository
+type service struct {
+	userRepo    domain.UserRepository
+	passwordSvc domain.PasswordService
+	emailSvc    domain.EmailService
 }
 
-type Input struct {
-	Email        string
-	PasswordHash string
+func NewRegisterUsecase(userRepo domain.UserRepository, passwordSvc domain.PasswordService, emailSvc domain.EmailService) Usecase {
+	return &service{
+		userRepo:    userRepo,
+		passwordSvc: passwordSvc,
+		emailSvc:    emailSvc,
+	}
 }
 
-func NewRegisterUsecase(repo domain.UserRepository) Usecase {
-	return &serivce{userRepo: repo}
-}
-
-func (s *serivce) Execute(ctx context.Context, input Input) error {
+func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
+	// Check existing user
 	existing, err := s.userRepo.GetByEmail(ctx, input.Email)
 	if err != nil {
-		return fmt.Errorf("failed to check existing user: %w", err)
+		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
 	if existing != nil {
-		return fmt.Errorf("email already registered")
+		return nil, domain.ErrUserAlreadyExists
 	}
 
+	// Hash password (business logic)
+	passwordHash, err := s.passwordSvc.Hash(input.Password)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// Create user
 	user := &domain.User{
 		Email:        input.Email,
-		PasswordHash: input.PasswordHash,
+		PasswordHash: passwordHash,
+		Status:       domain.UserStatusPending,
 	}
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
-		return fmt.Errorf("failed to create user: %w", err)
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	// Send OTP mail by Kafka
+	// Send verification email
+	if err := s.emailSvc.SendVerificationEmail(user.Email, "OTP"); err != nil {
+		// Log but don't fail - user is created
+		return &Output{UserID: user.ID}, nil
+	}
 
-	return nil
+	return &Output{UserID: user.ID}, nil
 }
