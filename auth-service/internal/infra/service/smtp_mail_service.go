@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"net/smtp"
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
 	"github.com/thanhnamdk2710/auth-service/internal/domain"
@@ -39,5 +40,26 @@ func (s *smtpEmailService) SendPasswordResetEmail(email, otp string) error {
 
 func (s *smtpEmailService) sendMail(to, subject, body string) error {
 	// Setup authentication
+	auth := smtp.PlainAuth("", s.username, s.password, s.host)
+
+	// Compose message with header
+	msg := []byte(fmt.Sprintf(
+		"From: %s\r\n"+
+			"To: %s\r\n"+
+			"Subject: %s\r\n"+
+			"MIME-Version: 1.0\r\n"+
+			"Content-Type: text/plain; charset=UTF-8\r\n"+
+			"\r\n"+
+			"%s\r\n",
+		s.from, to, subject, body,
+	))
+
+	// Send email
+	addr := fmt.Sprintf("%s:%s", s.host, s.port)
+	err := smtp.SendMail(addr, auth, s.from, []string{to}, msg)
+	if err != nil {
+		return fmt.Errorf("failed to send email to %s: %w", to, err)
+	}
+
 	return nil
 }

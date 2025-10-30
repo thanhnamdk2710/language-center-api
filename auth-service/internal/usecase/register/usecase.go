@@ -35,6 +35,11 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, domain.ErrUserAlreadyExists
 	}
 
+	// Validate password (business logic)
+	if err := s.passwordSvc.Validate(input.Password); err != nil {
+		return nil, err
+	}
+
 	// Hash password (business logic)
 	passwordHash, err := s.passwordSvc.Hash(input.Password)
 	if err != nil {
@@ -54,7 +59,6 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 
 	// Send verification email
 	if err := s.emailSvc.SendVerificationEmail(user.Email, "OTP"); err != nil {
-		// Log but don't fail - user is created
 		return &Output{UserID: user.ID}, nil
 	}
 

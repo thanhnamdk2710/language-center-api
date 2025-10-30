@@ -36,6 +36,10 @@ func (h *RegisterHandler) Register(c *gin.Context) {
 			response.Error(c, http.StatusConflict, "USER_EXISTS", err.Error())
 			return
 		}
+		if errors.Is(err, domain.ErrInvalidPassword) {
+			response.Error(c, http.StatusConflict, "INVALID_PASSWORD", err.Error())
+			return
+		}
 		response.Error(c, http.StatusInternalServerError, "SERVER_ERROR", err.Error())
 		return
 	}
