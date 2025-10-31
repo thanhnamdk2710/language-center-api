@@ -37,7 +37,7 @@ func main() {
 	defer redis.Close()
 
 	// Initialize container with all dependencies
-	container := container.NewContainer(db.Conn, cfg)
+	container := container.NewContainer(db.Conn, redis.Client, cfg)
 
 	var wg sync.WaitGroup
 	wg.Add(2)

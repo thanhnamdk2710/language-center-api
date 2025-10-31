@@ -15,13 +15,20 @@ type service struct {
 	userRepo    domain.UserRepository
 	passwordSvc domain.PasswordService
 	emailSvc    domain.EmailService
+	otpSvc      domain.OTPService
 }
 
-func NewRegisterUsecase(userRepo domain.UserRepository, passwordSvc domain.PasswordService, emailSvc domain.EmailService) Usecase {
+func NewRegisterUsecase(
+	userRepo domain.UserRepository,
+	passwordSvc domain.PasswordService,
+	emailSvc domain.EmailService,
+	otpSvc domain.OTPService,
+) Usecase {
 	return &service{
 		userRepo:    userRepo,
 		passwordSvc: passwordSvc,
 		emailSvc:    emailSvc,
+		otpSvc:      otpSvc,
 	}
 }
 
@@ -57,8 +64,14 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
+	// Generate OTP
+	otp, err := s.otpSvc.Generate(ctx, user.Email)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate OTP: %w", err)
+	}
+
 	// Send verification email
-	if err := s.emailSvc.SendVerificationEmail(user.Email, "OTP"); err != nil {
+	if err := s.emailSvc.SendVerificationEmail(user.Email, otp); err != nil {
 		return &Output{UserID: user.ID}, nil
 	}
 

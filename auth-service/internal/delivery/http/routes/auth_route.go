@@ -12,6 +12,7 @@ func initAuthRoutes(router *gin.RouterGroup, c *container.Container) *gin.Router
 
 	// Apis
 	auth.POST("/register", middlewares.BindAndValidate[dto.RegisterRequest](), c.RegisterHandler.Register)
+	auth.POST("/verify-otp", middlewares.BindAndValidate[dto.VerifyOTPRequest](), c.VerifyOTPHandler.VerifyOTP)
 	auth.POST("/login", middlewares.BindAndValidate[dto.LoginRequest](), c.LoginHandler.Login)
 	auth.POST("/forgot-password", middlewares.BindAndValidate[dto.ForgotPasswordRequest](), c.ForgotPasswordHandler.ForgotPassword)
 	auth.POST("/refresh-token", middlewares.BindAndValidate[dto.RefreshTokenRequest](), c.RefreshTokenHandler.RefreshToken)
