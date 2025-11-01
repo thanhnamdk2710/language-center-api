@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/container"
 	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/dto"
@@ -13,7 +15,14 @@ func initAuthRoutes(router *gin.RouterGroup, c *container.Container) *gin.Router
 	// Apis
 	auth.POST("/register", middlewares.BindAndValidate[dto.RegisterRequest](), c.RegisterHandler.Register)
 	auth.POST("/verify-otp", middlewares.BindAndValidate[dto.VerifyOTPRequest](), c.VerifyOTPHandler.VerifyOTP)
-	auth.POST("/login", middlewares.BindAndValidate[dto.LoginRequest](), c.LoginHandler.Login)
+
+	rateLimiter := middlewares.NewRateLimiter(5, 15*time.Minute)
+	auth.POST("/login",
+		rateLimiter.Middleware(),
+		middlewares.BindAndValidate[dto.LoginRequest](),
+		c.LoginHandler.Login,
+	)
+
 	auth.POST("/forgot-password", middlewares.BindAndValidate[dto.ForgotPasswordRequest](), c.ForgotPasswordHandler.ForgotPassword)
 	auth.POST("/refresh-token", middlewares.BindAndValidate[dto.RefreshTokenRequest](), c.RefreshTokenHandler.RefreshToken)
 

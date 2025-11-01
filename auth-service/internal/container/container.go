@@ -55,7 +55,7 @@ func NewContainer(db *sql.DB, redisClient *redis.Client, cfg *config.Config) *Co
 	// Usecases
 	registerUC := register.NewRegisterUsecase(userRepo, passwordSvc, emailSvc, otpSvc)
 	verifyOTPUC := verify_otp.NewVerifyOTPUsecase(userRepo, otpSvc, tokenSvc)
-	loginUC := login.NewLoginUsecase()
+	loginUC := login.NewLoginUsecase(userRepo, passwordSvc, tokenSvc)
 	forgotPasswordUC := forgot_password.NewForgotPasswordUsecase()
 	refreshTokenUC := refresh_password.NewRefreshTokenUsecase()
 

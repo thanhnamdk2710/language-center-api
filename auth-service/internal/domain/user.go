@@ -13,7 +13,7 @@ const (
 type User struct {
 	ID              string
 	Email           string
-	PasswordHash    string
+	Password        string
 	Status          UserStatus
 	EmailVerifiedAt *time.Time
 	CreatedAt       time.Time

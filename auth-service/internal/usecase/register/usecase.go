@@ -55,9 +55,9 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 
 	// Create user
 	user := &domain.User{
-		Email:        input.Email,
-		PasswordHash: passwordHash,
-		Status:       domain.UserStatusPending,
+		Email:    input.Email,
+		Password: passwordHash,
+		Status:   domain.UserStatusPending,
 	}
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
