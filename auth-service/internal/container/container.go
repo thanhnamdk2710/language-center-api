@@ -46,6 +46,7 @@ func NewContainer(db *sql.DB, redisClient *redis.Client, cfg *config.Config) *Co
 	passwordSvc := service.NewBcryptPasswordService()
 	emailSvc := service.NewSMTPEmailService(cfg.SMTP)
 	otpSvc := service.NewRedisOTPService(redisClient, 10*time.Minute)
+	sessionSvc := service.NewRedisSessionService(redisClient)
 	tokenSvc := service.NewJWTTokenService(
 		cfg.JWT.SecretKey,
 		cfg.JWT.AccessTokenDuration,
@@ -55,7 +56,7 @@ func NewContainer(db *sql.DB, redisClient *redis.Client, cfg *config.Config) *Co
 	// Usecases
 	registerUC := register.NewRegisterUsecase(userRepo, passwordSvc, emailSvc, otpSvc)
 	verifyOTPUC := verify_otp.NewVerifyOTPUsecase(userRepo, otpSvc, tokenSvc)
-	loginUC := login.NewLoginUsecase(userRepo, passwordSvc, tokenSvc)
+	loginUC := login.NewLoginUsecase(userRepo, passwordSvc, tokenSvc, sessionSvc)
 	forgotPasswordUC := forgot_password.NewForgotPasswordUsecase()
 	refreshTokenUC := refresh_password.NewRefreshTokenUsecase()
 

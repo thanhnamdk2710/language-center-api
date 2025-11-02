@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT NOT NULL,
     status VARCHAR(50) NOT NULL,
     email_verified_at TIMESTAMP NULL,
+    failed_login_attempts INT DEFAULT 0,
+    locked_until TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

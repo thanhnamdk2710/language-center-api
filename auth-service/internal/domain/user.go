@@ -11,11 +11,13 @@ const (
 )
 
 type User struct {
-	ID              string
-	Email           string
-	Password        string
-	Status          UserStatus
-	EmailVerifiedAt *time.Time
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	ID                  string
+	Email               string
+	Password            string
+	Status              UserStatus
+	EmailVerifiedAt     *time.Time
+	FailedLoginAttempts int
+	LockedUntil         *time.Time
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 }
