@@ -5,7 +5,6 @@ APP_NAME := auth-service
 BINARY := $(APP_NAME)
 MAIN := ./cmd/main.go
 MIGRATION_DIR := ./migrations
-PROTO_SRC := ./internal/delivery/grpc/proto_gen
 GO_PACKAGES := ./...
 
 # -------- Load .env --------
@@ -73,15 +72,6 @@ migrate-create: ## Create a new migration (usage: make migrate-create name=creat
 	@fi
 	@migrate create -ext sql -dir $(MIGRATION_DIR) -seq $(name)
 	@echo "Created new migration: $(name)"
-
-# ==============================================
-# Proto Generation (gRPC)
-# ==============================================
-.PHONY: proto_gen
-proto_gen: ## Generate gRPC code from proto files
-	@echo "Generating gRPC stubs..."
-	@proto --go_out=. --go-grpc_out=. $(PROTO_SRC)/*.proto
-	@echo "Proto files generated successfully!"
 
 # -------------------------------
 # Testing / Linting / Formatting

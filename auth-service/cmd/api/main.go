@@ -2,14 +2,12 @@ package main
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/container"
-	"github.com/thanhnamdk2710/auth-service/internal/delivery/grpc"
-	httpDelivery "github.com/thanhnamdk2710/auth-service/internal/delivery/http"
+	di "github.com/thanhnamdk2710/auth-service/internal/container"
+	httpapi "github.com/thanhnamdk2710/auth-service/internal/delivery/http"
 	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/postgres"
-	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/redis"
+	redisrepo "github.com/thanhnamdk2710/auth-service/internal/infra/repository/redis"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 
@@ -30,37 +28,22 @@ func main() {
 	}
 
 	// Connect Redis
-	redis, err := redis.NewRedisClient(&cfg.Redis)
+	rc, err := redisrepo.NewRedisClient(&cfg.Redis)
 	if err != nil {
 		logger.Fatal("Redis connection failed", err)
 	}
-	defer redis.Close()
+	defer rc.Close()
 
 	// Initialize container with all dependencies
-	container := container.NewContainer(db.Conn, redis.Client, cfg)
-
-	var wg sync.WaitGroup
-	wg.Add(2)
+	c := di.NewContainer(db.Conn, rc.Client, cfg)
 
 	// HTTP server
-	go func() {
-		defer wg.Done()
+	r := httpapi.NewRouter(c)
 
-		r := httpDelivery.NewRouter(container)
+	addr := fmt.Sprintf(":%s", cfg.HTTPPort)
+	logger.Info(fmt.Sprintf("HTTP server running on %s", addr))
 
-		addr := fmt.Sprintf(":%s", cfg.HTTPPort)
-		logger.Info(fmt.Sprintf("HTTP server running on %s", addr))
-
-		if err := r.Run(addr); err != nil {
-			logger.Fatal("Failed to start server", err)
-		}
-	}()
-
-	// gRPC server
-	go func() {
-		defer wg.Done()
-		grpc.StartGRPCServer(cfg)
-	}()
-
-	wg.Wait()
+	if err := r.Run(addr); err != nil {
+		logger.Fatal("Failed to start server", err)
+	}
 }

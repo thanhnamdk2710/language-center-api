@@ -19,7 +19,7 @@ func NewForgotPasswordHandler(u forgot_password.Usecase) *ForgotPasswordHandler 
 }
 
 func (h *ForgotPasswordHandler) ForgotPassword(c *gin.Context) {
-	response.Success(c, http.StatusCreated, gin.H{
+	response.Success(c, http.StatusOK, gin.H{
 		"message": "ForgotPassword",
 	})
 }
