@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
+	httpapi "github.com/thanhnamdk2710/auth-service/internal/adapter/http"
 	"github.com/thanhnamdk2710/auth-service/internal/config"
 	di "github.com/thanhnamdk2710/auth-service/internal/container"
-	httpapi "github.com/thanhnamdk2710/auth-service/internal/delivery/http"
 	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/postgres"
 	redisrepo "github.com/thanhnamdk2710/auth-service/internal/infra/repository/redis"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"

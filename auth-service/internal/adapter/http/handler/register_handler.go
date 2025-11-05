@@ -1,11 +1,11 @@
-package handlers
+package handler
 
 import (
 	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/dto"
+	"github.com/thanhnamdk2710/auth-service/internal/adapter/http/dto"
 	"github.com/thanhnamdk2710/auth-service/internal/domain"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/response"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/register"

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/thanhnamdk2710/auth-service/internal/adapter/http/handler"
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/delivery/http/handlers"
 	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/postgres"
 	"github.com/thanhnamdk2710/auth-service/internal/infra/service"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/forgot_password"
@@ -17,11 +17,11 @@ import (
 )
 
 type Container struct {
-	RegisterHandler       *handlers.RegisterHandler
-	VerifyOTPHandler      *handlers.VerifyOTPHandler
-	LoginHandler          *handlers.LoginHandler
-	ForgotPasswordHandler *handlers.ForgotPasswordHandler
-	RefreshTokenHandler   *handlers.RefreshTokenHandler
+	RegisterHandler       *handler.RegisterHandler
+	VerifyOTPHandler      *handler.VerifyOTPHandler
+	LoginHandler          *handler.LoginHandler
+	ForgotPasswordHandler *handler.ForgotPasswordHandler
+	RefreshTokenHandler   *handler.RefreshTokenHandler
 }
 
 func NewContainer(db *sql.DB, redisClient *redis.Client, cfg *config.Config) *Container {
@@ -45,11 +45,11 @@ func NewContainer(db *sql.DB, redisClient *redis.Client, cfg *config.Config) *Co
 	refreshTokenUC := refresh_password.NewRefreshTokenUsecase()
 
 	// Handlers
-	registerHandler := handlers.NewRegisterHandler(registerUC)
-	verifyOTPHandler := handlers.NewVerifyOTPHandler(verifyOTPUC)
-	loginHandler := handlers.NewLoginHandler(loginUC)
-	forgotPasswordHandler := handlers.NewForgotPasswordHandler(forgotPasswordUC)
-	refreshTokenHandler := handlers.NewRefreshTokenHandler(refreshTokenUC)
+	registerHandler := handler.NewRegisterHandler(registerUC)
+	verifyOTPHandler := handler.NewVerifyOTPHandler(verifyOTPUC)
+	loginHandler := handler.NewLoginHandler(loginUC)
+	forgotPasswordHandler := handler.NewForgotPasswordHandler(forgotPasswordUC)
+	refreshTokenHandler := handler.NewRefreshTokenHandler(refreshTokenUC)
 
 	return &Container{
 		RegisterHandler:       registerHandler,
