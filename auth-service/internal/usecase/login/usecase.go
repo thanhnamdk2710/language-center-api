@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/thanhnamdk2710/auth-service/internal/domain"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/entity"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/repository"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/service/password"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/service/session"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/service/token"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 )
 
 type Usecase interface {
@@ -13,17 +18,17 @@ type Usecase interface {
 }
 
 type service struct {
-	userRepo    domain.UserRepository
-	passwordSvc domain.PasswordService
-	tokenSvc    domain.TokenService
-	sessionSvc  domain.SessionService
+	userRepo    repository.UserRepository
+	passwordSvc password.Service
+	tokenSvc    token.Service
+	sessionSvc  session.Service
 }
 
 func NewLoginUsecase(
-	userRepo domain.UserRepository,
-	passwordSvc domain.PasswordService,
-	tokenSvc domain.TokenService,
-	sessionSvc domain.SessionService,
+	userRepo repository.UserRepository,
+	passwordSvc password.Service,
+	tokenSvc token.Service,
+	sessionSvc session.Service,
 ) Usecase {
 	return &service{
 		userRepo:    userRepo,
@@ -40,20 +45,20 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 	if user == nil {
-		return nil, domain.ErrInvalidCredentials
+		return nil, valueobject.ErrInvalidCredentials
 	}
 
 	// Check email verification and account status
-	if user.Status == domain.UserStatusPending {
-		return nil, domain.ErrEmailNotVerified
+	if user.Status == valueobject.UserStatusPending {
+		return nil, valueobject.ErrEmailNotVerified
 	}
-	if user.Status == domain.UserStatusDisabled {
-		return nil, domain.ErrAccountDisabled
+	if user.Status == valueobject.UserStatusDisabled {
+		return nil, valueobject.ErrAccountDisabled
 	}
 
 	// Check if account is locked
 	if user.LockedUntil != nil && time.Now().Before(*user.LockedUntil) {
-		return nil, domain.ErrAccountLocked
+		return nil, valueobject.ErrAccountLocked
 	}
 
 	// Verify password
@@ -70,10 +75,10 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 			if err := s.userRepo.LockAccount(ctx, user.ID, lockDuration); err != nil {
 				// Log error
 			}
-			return nil, domain.ErrAccountLocked
+			return nil, valueobject.ErrAccountLocked
 		}
 
-		return nil, domain.ErrInvalidCredentials
+		return nil, valueobject.ErrInvalidCredentials
 	}
 
 	// Reset failed attempts on successful login
@@ -95,7 +100,7 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	}
 
 	// Store refresh token session
-	session := &domain.Session{
+	session := &entity.Session{
 		UserID:       user.ID,
 		RefreshToken: refreshToken,
 		ExpiresAt:    time.Now().Add(7 * 24 * time.Hour),

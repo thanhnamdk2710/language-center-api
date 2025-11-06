@@ -1,11 +1,11 @@
-package service
+package email
 
 import (
 	"fmt"
 	"net/smtp"
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/domain"
+	domainEmail "github.com/thanhnamdk2710/auth-service/internal/domain/service/email"
 )
 
 type smtpEmailService struct {
@@ -16,7 +16,7 @@ type smtpEmailService struct {
 	from     string
 }
 
-func NewSMTPEmailService(cfg config.SMTPConfig) domain.EmailService {
+func NewSMTPEmailService(cfg config.SMTPConfig) domainEmail.Service {
 	return &smtpEmailService{
 		host:     cfg.Host,
 		port:     cfg.Port,

@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	httpapi "github.com/thanhnamdk2710/auth-service/internal/adapter/http"
+	di "github.com/thanhnamdk2710/auth-service/internal/app"
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	di "github.com/thanhnamdk2710/auth-service/internal/container"
-	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/postgres"
-	redisrepo "github.com/thanhnamdk2710/auth-service/internal/infra/repository/redis"
+	"github.com/thanhnamdk2710/auth-service/internal/infra/postgres"
+	redisrepo "github.com/thanhnamdk2710/auth-service/internal/infra/redis"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 

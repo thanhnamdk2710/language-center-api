@@ -1,23 +1,17 @@
-package domain
+package session
 
 import (
 	"context"
-	"time"
+
+	"github.com/thanhnamdk2710/auth-service/internal/domain/entity"
 )
 
-type Session struct {
-	UserID       string
-	RefreshToken string
-	ExpiresAt    time.Time
-	CreatedAt    time.Time
-}
-
-type SessionService interface {
+type Service interface {
 	// Store saves a refresh token session
-	Store(ctx context.Context, session *Session) error
+	Store(ctx context.Context, session *entity.Session) error
 
 	// Get retrieves a session by refresh token
-	Get(ctx context.Context, refreshToken string) (*Session, error)
+	Get(ctx context.Context, refreshToken string) (*entity.Session, error)
 
 	// Delete removes a session (logout)
 	Delete(ctx context.Context, refreshToken string) error

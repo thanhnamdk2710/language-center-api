@@ -1,9 +1,10 @@
-package service
+package password
 
 import (
 	"unicode"
 
-	"github.com/thanhnamdk2710/auth-service/internal/domain"
+	domainPassword "github.com/thanhnamdk2710/auth-service/internal/domain/service/password"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -11,7 +12,7 @@ type bcryptPasswordService struct {
 	cost int
 }
 
-func NewBcryptPasswordService() domain.PasswordService {
+func NewBcryptPasswordService() domainPassword.Service {
 	return &bcryptPasswordService{
 		cost: bcrypt.DefaultCost,
 	}
@@ -39,7 +40,7 @@ func (s *bcryptPasswordService) Validate(password string) error {
 	}
 
 	if !hasUpper || !hasLower || !hasNumber || !hasSpecial {
-		return domain.ErrInvalidPassword
+		return valueobject.ErrInvalidPassword
 	}
 
 	return nil

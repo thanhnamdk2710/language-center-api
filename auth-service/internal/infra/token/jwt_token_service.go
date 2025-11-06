@@ -1,11 +1,11 @@
-package service
+package token
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/thanhnamdk2710/auth-service/internal/domain"
+	domainToken "github.com/thanhnamdk2710/auth-service/internal/domain/service/token"
 )
 
 type jwtTokenService struct {
@@ -19,7 +19,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func NewJWTTokenService(secretKey string, accessTokenDuration, refreshTokenDuration time.Duration) domain.TokenService {
+func NewJWTTokenService(secretKey string, accessTokenDuration, refreshTokenDuration time.Duration) domainToken.Service {
 	return &jwtTokenService{
 		secretKey:            []byte(secretKey),
 		accessTokenDuration:  accessTokenDuration,

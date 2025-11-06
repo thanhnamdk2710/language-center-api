@@ -1,4 +1,4 @@
-package service
+package otp
 
 import (
 	"context"
@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/thanhnamdk2710/auth-service/internal/domain"
+	domainOTP "github.com/thanhnamdk2710/auth-service/internal/domain/service/otp"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 )
 
 type redisOTPService struct {
@@ -16,7 +17,7 @@ type redisOTPService struct {
 	expiration time.Duration
 }
 
-func NewRedisOTPService(client *redis.Client, expiration time.Duration) domain.OTPService {
+func NewRedisOTPService(client *redis.Client, expiration time.Duration) domainOTP.Service {
 	return &redisOTPService{
 		client:     client,
 		expiration: expiration,
@@ -46,7 +47,7 @@ func (s *redisOTPService) Verify(ctx context.Context, email, otp string) error {
 	// Get OTP from Redis
 	storedOTP, err := s.client.Get(ctx, key).Result()
 	if err == redis.Nil {
-		return domain.ErrOTPExpired
+		return valueobject.ErrOTPExpired
 	}
 	if err != nil {
 		return fmt.Errorf("failed to get OTP: %w", err)
@@ -54,7 +55,7 @@ func (s *redisOTPService) Verify(ctx context.Context, email, otp string) error {
 
 	// Verify OTP
 	if storedOTP != otp {
-		return domain.ErrOTPInvalid
+		return valueobject.ErrOTPInvalid
 	}
 
 	return nil

@@ -7,8 +7,12 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/thanhnamdk2710/auth-service/internal/adapter/http/handler"
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/infra/repository/postgres"
-	"github.com/thanhnamdk2710/auth-service/internal/infra/service"
+	"github.com/thanhnamdk2710/auth-service/internal/infra/email"
+	"github.com/thanhnamdk2710/auth-service/internal/infra/otp"
+	"github.com/thanhnamdk2710/auth-service/internal/infra/password"
+	"github.com/thanhnamdk2710/auth-service/internal/infra/postgres"
+	"github.com/thanhnamdk2710/auth-service/internal/infra/session"
+	"github.com/thanhnamdk2710/auth-service/internal/infra/token"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/forgot_password"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/login"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/refresh_password"
@@ -27,11 +31,11 @@ type Container struct {
 func NewContainer(db *sql.DB, redisClient *redis.Client, cfg *config.Config) *Container {
 	// Infrastructure
 	userRepo := postgres.NewUserRepository(db)
-	passwordSvc := service.NewBcryptPasswordService()
-	emailSvc := service.NewSMTPEmailService(cfg.SMTP)
-	otpSvc := service.NewRedisOTPService(redisClient, 10*time.Minute)
-	sessionSvc := service.NewRedisSessionService(redisClient)
-	tokenSvc := service.NewJWTTokenService(
+	passwordSvc := password.NewBcryptPasswordService()
+	emailSvc := email.NewSMTPEmailService(cfg.SMTP)
+	otpSvc := otp.NewRedisOTPService(redisClient, 10*time.Minute)
+	sessionSvc := session.NewRedisSessionService(redisClient)
+	tokenSvc := token.NewJWTTokenService(
 		cfg.JWT.SecretKey,
 		cfg.JWT.AccessTokenDuration,
 		cfg.JWT.RefreshTokenDuration,

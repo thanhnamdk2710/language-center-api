@@ -1,4 +1,4 @@
-package service
+package session
 
 import (
 	"context"
@@ -7,20 +7,21 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/thanhnamdk2710/auth-service/internal/domain"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/entity"
+	domainSession "github.com/thanhnamdk2710/auth-service/internal/domain/service/session"
 )
 
 type redisSessionService struct {
 	client *redis.Client
 }
 
-func NewRedisSessionService(client *redis.Client) domain.SessionService {
+func NewRedisSessionService(client *redis.Client) domainSession.Service {
 	return &redisSessionService{
 		client: client,
 	}
 }
 
-func (s *redisSessionService) Store(ctx context.Context, session *domain.Session) error {
+func (s *redisSessionService) Store(ctx context.Context, session *entity.Session) error {
 	key := fmt.Sprintf("session:%s", session.RefreshToken)
 	userKey := fmt.Sprintf("user_sessions:%s", session.UserID)
 
@@ -54,7 +55,7 @@ func (s *redisSessionService) Store(ctx context.Context, session *domain.Session
 	return nil
 }
 
-func (s *redisSessionService) Get(ctx context.Context, refreshToken string) (*domain.Session, error) {
+func (s *redisSessionService) Get(ctx context.Context, refreshToken string) (*entity.Session, error) {
 	key := fmt.Sprintf("session:%s", refreshToken)
 
 	data, err := s.client.Get(ctx, key).Result()
@@ -65,7 +66,7 @@ func (s *redisSessionService) Get(ctx context.Context, refreshToken string) (*do
 		return nil, fmt.Errorf("failed to get session: %w", err)
 	}
 
-	var session domain.Session
+	var session entity.Session
 	if err := json.Unmarshal([]byte(data), &session); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal session: %w", err)
 	}

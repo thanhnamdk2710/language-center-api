@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/thanhnamdk2710/auth-service/internal/domain"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/repository"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/service/otp"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/service/token"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 )
 
 type Usecase interface {
@@ -12,12 +15,16 @@ type Usecase interface {
 }
 
 type service struct {
-	userRepo domain.UserRepository
-	otpSvc   domain.OTPService
-	tokenSvc domain.TokenService
+	userRepo repository.UserRepository
+	otpSvc   otp.Service
+	tokenSvc token.Service
 }
 
-func NewVerifyOTPUsecase(userRepo domain.UserRepository, otpSvc domain.OTPService, tokenSvc domain.TokenService) Usecase {
+func NewVerifyOTPUsecase(
+	userRepo repository.UserRepository,
+	otpSvc otp.Service,
+	tokenSvc token.Service,
+) Usecase {
 	return &service{
 		userRepo: userRepo,
 		otpSvc:   otpSvc,
@@ -37,7 +44,7 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 	if user == nil {
-		return nil, domain.ErrUserNotFound
+		return nil, valueobject.ErrUserNotFound
 	}
 
 	// Update user status to active

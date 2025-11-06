@@ -1,6 +1,6 @@
-package domain
+package email
 
-type EmailService interface {
+type Service interface {
 	SendVerificationEmail(email, otp string) error
 	SendPasswordResetEmail(email, token string) error
 }

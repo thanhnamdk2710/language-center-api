@@ -1,23 +1,23 @@
-package domain
+package entity
 
-import "time"
+import (
+	"time"
 
-type UserStatus string
-
-const (
-	UserStatusPending  UserStatus = "pending"
-	UserStatusActive   UserStatus = "active"
-	UserStatusDisabled UserStatus = "disabled"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 )
 
 type User struct {
 	ID                  string
 	Email               string
 	Password            string
-	Status              UserStatus
+	Status              valueobject.UserStatus
 	EmailVerifiedAt     *time.Time
 	FailedLoginAttempts int
 	LockedUntil         *time.Time
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
+}
+
+func (u *User) IsLocked(now time.Time) bool {
+	return u.LockedUntil != nil && now.Before(*u.LockedUntil)
 }

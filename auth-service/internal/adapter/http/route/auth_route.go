@@ -6,10 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/adapter/http/dto"
 	"github.com/thanhnamdk2710/auth-service/internal/adapter/http/middleware"
-	"github.com/thanhnamdk2710/auth-service/internal/container"
+	di "github.com/thanhnamdk2710/auth-service/internal/app"
 )
 
-func initAuthRoutes(router *gin.RouterGroup, c *container.Container) *gin.RouterGroup {
+func initAuthRoutes(router *gin.RouterGroup, c *di.Container) *gin.RouterGroup {
 	auth := router.Group("auth")
 
 	// Apis

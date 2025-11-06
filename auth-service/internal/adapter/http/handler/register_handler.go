@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/adapter/http/dto"
-	"github.com/thanhnamdk2710/auth-service/internal/domain"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/response"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/register"
 )
@@ -32,11 +32,11 @@ func (h *RegisterHandler) Register(c *gin.Context) {
 	output, err := h.usecase.Execute(c.Request.Context(), input)
 	if err != nil {
 		// Map domain errors to HTTP errors
-		if errors.Is(err, domain.ErrUserAlreadyExists) {
+		if errors.Is(err, valueobject.ErrUserAlreadyExists) {
 			response.Error(c, http.StatusConflict, "USER_EXISTS", err.Error())
 			return
 		}
-		if errors.Is(err, domain.ErrInvalidPassword) {
+		if errors.Is(err, valueobject.ErrInvalidPassword) {
 			response.Error(c, http.StatusConflict, "INVALID_PASSWORD", err.Error())
 			return
 		}

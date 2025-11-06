@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/adapter/http/dto"
-	"github.com/thanhnamdk2710/auth-service/internal/domain"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/response"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/verify_otp"
 )
@@ -33,13 +33,13 @@ func (h *VerifyOTPHandler) VerifyOTP(c *gin.Context) {
 	if err != nil {
 		// Map domain errors to HTTP errors
 		switch {
-		case errors.Is(err, domain.ErrOTPExpired):
+		case errors.Is(err, valueobject.ErrOTPExpired):
 			response.Error(c, http.StatusBadRequest, "OTP_EXPIRED", "OTP has expired, please request a new one")
 			return
-		case errors.Is(err, domain.ErrOTPInvalid):
+		case errors.Is(err, valueobject.ErrOTPInvalid):
 			response.Error(c, http.StatusBadRequest, "OTP_INVALID", "Invalid OTP code")
 			return
-		case errors.Is(err, domain.ErrUserNotFound):
+		case errors.Is(err, valueobject.ErrUserNotFound):
 			response.Error(c, http.StatusNotFound, "USER_NOT_FOUND", "User not found")
 			return
 		default:
