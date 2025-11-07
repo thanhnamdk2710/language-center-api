@@ -1,14 +1,14 @@
-package token
+package jwt
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	domainToken "github.com/thanhnamdk2710/auth-service/internal/domain/service/token"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/service/token"
 )
 
-type jwtTokenService struct {
+type tokenService struct {
 	secretKey            []byte
 	accessTokenDuration  time.Duration
 	refreshTokenDuration time.Duration
@@ -19,15 +19,15 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func NewJWTTokenService(secretKey string, accessTokenDuration, refreshTokenDuration time.Duration) domainToken.Service {
-	return &jwtTokenService{
+func NewTokenService(secretKey string, accessTokenDuration, refreshTokenDuration time.Duration) token.Service {
+	return &tokenService{
 		secretKey:            []byte(secretKey),
 		accessTokenDuration:  accessTokenDuration,
 		refreshTokenDuration: refreshTokenDuration,
 	}
 }
 
-func (s *jwtTokenService) GenerateAccessToken(userID string) (string, error) {
+func (s *tokenService) GenerateAccessToken(userID string) (string, error) {
 	claims := Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -46,7 +46,7 @@ func (s *jwtTokenService) GenerateAccessToken(userID string) (string, error) {
 	return tokenString, nil
 }
 
-func (s *jwtTokenService) GenerateRefreshToken(userID string) (string, error) {
+func (s *tokenService) GenerateRefreshToken(userID string) (string, error) {
 	claims := Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{

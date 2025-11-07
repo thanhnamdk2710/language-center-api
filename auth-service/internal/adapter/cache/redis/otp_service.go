@@ -1,4 +1,4 @@
-package otp
+package redis
 
 import (
 	"context"
@@ -8,25 +8,25 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	domainOTP "github.com/thanhnamdk2710/auth-service/internal/domain/service/otp"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/service/otp"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 )
 
-type redisOTPService struct {
+type otpService struct {
 	client     *redis.Client
 	expiration time.Duration
 }
 
-func NewRedisOTPService(client *redis.Client, expiration time.Duration) domainOTP.Service {
-	return &redisOTPService{
+func NewOTPService(client *redis.Client, expiration time.Duration) otp.Service {
+	return &otpService{
 		client:     client,
 		expiration: expiration,
 	}
 }
 
-func (s *redisOTPService) Generate(ctx context.Context, email string) (string, error) {
+func (s *otpService) Generate(ctx context.Context, email string) (string, error) {
 	// Generate OTP
-	otp, err := GenerateOTP()
+	otp, err := generateOTP()
 	if err != nil {
 		return "", err
 	}
@@ -41,7 +41,7 @@ func (s *redisOTPService) Generate(ctx context.Context, email string) (string, e
 	return otp, nil
 }
 
-func (s *redisOTPService) Verify(ctx context.Context, email, otp string) error {
+func (s *otpService) Verify(ctx context.Context, email, otpCode string) error {
 	key := fmt.Sprintf("otp:%s", email)
 
 	// Get OTP from Redis
@@ -54,14 +54,14 @@ func (s *redisOTPService) Verify(ctx context.Context, email, otp string) error {
 	}
 
 	// Verify OTP
-	if storedOTP != otp {
+	if storedOTP != otpCode {
 		return valueobject.ErrOTPInvalid
 	}
 
 	return nil
 }
 
-func (s *redisOTPService) Delete(ctx context.Context, email string) error {
+func (s *otpService) Delete(ctx context.Context, email string) error {
 	key := fmt.Sprintf("otp:%s", email)
 	err := s.client.Del(ctx, key).Err()
 	if err != nil {
@@ -70,7 +70,7 @@ func (s *redisOTPService) Delete(ctx context.Context, email string) error {
 	return nil
 }
 
-func GenerateOTP() (string, error) {
+func generateOTP() (string, error) {
 	// Generate a random 6-digit number
 	max := big.NewInt(1000000)
 	n, err := rand.Int(rand.Reader, max)

@@ -10,12 +10,12 @@ import (
 	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 
-type RedisClient struct {
+type Client struct {
 	Client *redis.Client
 	TTL    time.Duration
 }
 
-func NewRedisClient(cfg *config.RedisConfig) (*RedisClient, error) {
+func NewClient(cfg *config.RedisConfig) (*Client, error) {
 	addr := fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)
 
 	rdb := redis.NewClient(&redis.Options{
@@ -32,9 +32,9 @@ func NewRedisClient(cfg *config.RedisConfig) (*RedisClient, error) {
 	}
 
 	logger.Info("Connected to Redis successfully")
-	return &RedisClient{Client: rdb, TTL: time.Duration(cfg.TTL) * time.Second}, nil
+	return &Client{Client: rdb, TTL: time.Duration(cfg.TTL) * time.Second}, nil
 }
 
-func (r *RedisClient) Close() error {
+func (r *Client) Close() error {
 	return r.Client.Close()
 }

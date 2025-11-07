@@ -1,4 +1,4 @@
-package refresh_password
+package refresh_token
 
 import (
 	"context"

@@ -1,14 +1,14 @@
-package email
+package smtp
 
 import (
 	"fmt"
 	"net/smtp"
 
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	domainEmail "github.com/thanhnamdk2710/auth-service/internal/domain/service/email"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/service/email"
 )
 
-type smtpEmailService struct {
+type emailService struct {
 	host     string
 	port     string
 	username string
@@ -16,8 +16,8 @@ type smtpEmailService struct {
 	from     string
 }
 
-func NewSMTPEmailService(cfg config.SMTPConfig) domainEmail.Service {
-	return &smtpEmailService{
+func NewEmailService(cfg config.SMTPConfig) email.Service {
+	return &emailService{
 		host:     cfg.Host,
 		port:     cfg.Port,
 		username: cfg.Username,
@@ -26,19 +26,19 @@ func NewSMTPEmailService(cfg config.SMTPConfig) domainEmail.Service {
 	}
 }
 
-func (s *smtpEmailService) SendVerificationEmail(email, otp string) error {
+func (s *emailService) SendVerificationEmail(emailAddr, otp string) error {
 	subject := "Email Verification"
 	body := fmt.Sprintf("Your verification code is: %s\n\nThis code will expire in 10 minutes.", otp)
-	return s.sendMail(email, subject, body)
+	return s.sendMail(emailAddr, subject, body)
 }
 
-func (s *smtpEmailService) SendPasswordResetEmail(email, otp string) error {
-	subject := "Email Verification"
-	body := fmt.Sprintf("Your verification code is: %s\n\nThis code will expire in 10 minutes.", otp)
-	return s.sendMail(email, subject, body)
+func (s *emailService) SendPasswordResetEmail(emailAddr, otp string) error {
+	subject := "Password Reset"
+	body := fmt.Sprintf("Your password reset code is: %s\n\nThis code will expire in 10 minutes.", otp)
+	return s.sendMail(emailAddr, subject, body)
 }
 
-func (s *smtpEmailService) sendMail(to, subject, body string) error {
+func (s *emailService) sendMail(to, subject, body string) error {
 	// Setup authentication
 	auth := smtp.PlainAuth("", s.username, s.password, s.host)
 

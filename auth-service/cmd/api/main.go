@@ -5,9 +5,9 @@ import (
 
 	httpapi "github.com/thanhnamdk2710/auth-service/internal/adapter/http"
 	di "github.com/thanhnamdk2710/auth-service/internal/app"
+	"github.com/thanhnamdk2710/auth-service/internal/adapter/cache/redis"
+	"github.com/thanhnamdk2710/auth-service/internal/adapter/persistence/postgres"
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/infra/postgres"
-	redisrepo "github.com/thanhnamdk2710/auth-service/internal/infra/redis"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 
@@ -28,7 +28,7 @@ func main() {
 	}
 
 	// Connect Redis
-	rc, err := redisrepo.NewRedisClient(&cfg.Redis)
+	rc, err := redis.NewClient(&cfg.Redis)
 	if err != nil {
 		logger.Fatal("Redis connection failed", err)
 	}

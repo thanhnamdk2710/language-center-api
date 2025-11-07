@@ -1,4 +1,4 @@
-package session
+package redis
 
 import (
 	"context"
@@ -8,31 +8,31 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/entity"
-	domainSession "github.com/thanhnamdk2710/auth-service/internal/domain/service/session"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/service/session"
 )
 
-type redisSessionService struct {
+type sessionService struct {
 	client *redis.Client
 }
 
-func NewRedisSessionService(client *redis.Client) domainSession.Service {
-	return &redisSessionService{
+func NewSessionService(client *redis.Client) session.Service {
+	return &sessionService{
 		client: client,
 	}
 }
 
-func (s *redisSessionService) Store(ctx context.Context, session *entity.Session) error {
-	key := fmt.Sprintf("session:%s", session.RefreshToken)
-	userKey := fmt.Sprintf("user_sessions:%s", session.UserID)
+func (s *sessionService) Store(ctx context.Context, sess *entity.Session) error {
+	key := fmt.Sprintf("session:%s", sess.RefreshToken)
+	userKey := fmt.Sprintf("user_sessions:%s", sess.UserID)
 
 	// Serialize session
-	data, err := json.Marshal(session)
+	data, err := json.Marshal(sess)
 	if err != nil {
 		return fmt.Errorf("failed to marshal session: %w", err)
 	}
 
 	// Calculate TTL
-	ttl := time.Until(session.ExpiresAt)
+	ttl := time.Until(sess.ExpiresAt)
 	if ttl <= 0 {
 		return fmt.Errorf("session already expired")
 	}
@@ -43,7 +43,7 @@ func (s *redisSessionService) Store(ctx context.Context, session *entity.Session
 	}
 
 	// Add to user's session set (for logout all devices)
-	if err := s.client.SAdd(ctx, userKey, session.RefreshToken).Err(); err != nil {
+	if err := s.client.SAdd(ctx, userKey, sess.RefreshToken).Err(); err != nil {
 		return fmt.Errorf("failed to add to user session: %w", err)
 	}
 
@@ -55,7 +55,7 @@ func (s *redisSessionService) Store(ctx context.Context, session *entity.Session
 	return nil
 }
 
-func (s *redisSessionService) Get(ctx context.Context, refreshToken string) (*entity.Session, error) {
+func (s *sessionService) Get(ctx context.Context, refreshToken string) (*entity.Session, error) {
 	key := fmt.Sprintf("session:%s", refreshToken)
 
 	data, err := s.client.Get(ctx, key).Result()
@@ -66,33 +66,33 @@ func (s *redisSessionService) Get(ctx context.Context, refreshToken string) (*en
 		return nil, fmt.Errorf("failed to get session: %w", err)
 	}
 
-	var session entity.Session
-	if err := json.Unmarshal([]byte(data), &session); err != nil {
+	var sess entity.Session
+	if err := json.Unmarshal([]byte(data), &sess); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal session: %w", err)
 	}
 
-	return &session, nil
+	return &sess, nil
 }
 
-func (s *redisSessionService) Delete(ctx context.Context, refreshToken string) error {
+func (s *sessionService) Delete(ctx context.Context, refreshToken string) error {
 	// Get session first to get user ID
-	session, err := s.Get(ctx, refreshToken)
+	sess, err := s.Get(ctx, refreshToken)
 	if err != nil {
 		return err
 	}
-	if session == nil {
+	if sess == nil {
 		return nil // Already deleted
 	}
 
 	key := fmt.Sprintf("session:%s", refreshToken)
-	userKey := fmt.Sprintf("user_sessions:%s", session.UserID)
+	userKey := fmt.Sprintf("user_sessions:%s", sess.UserID)
 
 	// Delete session
 	if err := s.client.Del(ctx, key).Err(); err != nil {
 		return fmt.Errorf("failed to delete session: %w", err)
 	}
 
-	// Remove fromm user's session set
+	// Remove from user's session set
 	if err := s.client.SRem(ctx, userKey, refreshToken).Err(); err != nil {
 		return fmt.Errorf("failed to remove from user session: %w", err)
 	}
@@ -100,7 +100,7 @@ func (s *redisSessionService) Delete(ctx context.Context, refreshToken string) e
 	return nil
 }
 
-func (s *redisSessionService) DeleteAllByUserID(ctx context.Context, userID string) error {
+func (s *sessionService) DeleteAllByUserID(ctx context.Context, userID string) error {
 	userKey := fmt.Sprintf("user_session:%s", userID)
 
 	// Get all refresh tokens from this user

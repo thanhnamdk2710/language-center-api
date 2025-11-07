@@ -1,24 +1,24 @@
-package password
+package bcrypt
 
 import (
 	"unicode"
 
-	domainPassword "github.com/thanhnamdk2710/auth-service/internal/domain/service/password"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/service/password"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type bcryptPasswordService struct {
+type passwordService struct {
 	cost int
 }
 
-func NewBcryptPasswordService() domainPassword.Service {
-	return &bcryptPasswordService{
+func NewPasswordService() password.Service {
+	return &passwordService{
 		cost: bcrypt.DefaultCost,
 	}
 }
 
-func (s *bcryptPasswordService) Validate(password string) error {
+func (s *passwordService) Validate(pwd string) error {
 	var (
 		hasUpper   bool
 		hasLower   bool
@@ -26,7 +26,7 @@ func (s *bcryptPasswordService) Validate(password string) error {
 		hasSpecial bool
 	)
 
-	for _, char := range password {
+	for _, char := range pwd {
 		switch {
 		case unicode.IsUpper(char):
 			hasUpper = true
@@ -46,8 +46,8 @@ func (s *bcryptPasswordService) Validate(password string) error {
 	return nil
 }
 
-func (s *bcryptPasswordService) Hash(password string) (string, error) {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), s.cost)
+func (s *passwordService) Hash(pwd string) (string, error) {
+	hashed, err := bcrypt.GenerateFromPassword([]byte(pwd), s.cost)
 	if err != nil {
 		return "", err
 	}
@@ -55,7 +55,7 @@ func (s *bcryptPasswordService) Hash(password string) (string, error) {
 	return string(hashed), nil
 }
 
-func (s *bcryptPasswordService) Verify(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+func (s *passwordService) Verify(pwd, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(pwd))
 	return err == nil
 }

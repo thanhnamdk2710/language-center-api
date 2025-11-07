@@ -5,14 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/response"
-	"github.com/thanhnamdk2710/auth-service/internal/usecase/refresh_password"
+	"github.com/thanhnamdk2710/auth-service/internal/usecase/refresh_token"
 )
 
 type RefreshTokenHandler struct {
-	usecase refresh_password.Usecase
+	usecase refresh_token.Usecase
 }
 
-func NewRefreshTokenHandler(usecase refresh_password.Usecase) *RefreshTokenHandler {
+func NewRefreshTokenHandler(usecase refresh_token.Usecase) *RefreshTokenHandler {
 	return &RefreshTokenHandler{
 		usecase: usecase,
 	}
