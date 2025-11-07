@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/adapter/http/dto"
 	"github.com/thanhnamdk2710/auth-service/internal/adapter/http/middleware"
-	di "github.com/thanhnamdk2710/auth-service/internal/app"
+	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/di"
 )
 
 func initAuthRoutes(router *gin.RouterGroup, c *di.Container) *gin.RouterGroup {

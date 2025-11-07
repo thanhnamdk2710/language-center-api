@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	httpapi "github.com/thanhnamdk2710/auth-service/internal/adapter/http"
-	di "github.com/thanhnamdk2710/auth-service/internal/app"
-	"github.com/thanhnamdk2710/auth-service/internal/adapter/cache/redis"
-	"github.com/thanhnamdk2710/auth-service/internal/adapter/persistence/postgres"
 	"github.com/thanhnamdk2710/auth-service/internal/config"
+	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/cache"
+	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/database"
+	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/di"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 
@@ -15,27 +15,27 @@ func main() {
 	cfg := config.Load()
 	logger.InitLogger(cfg.AppName, "dev")
 
-	// Connect Database
-	db, err := postgres.NewPostgresDB(&cfg.Postgres)
+	// Initialize database connection
+	db, err := database.NewPostgresDB(&cfg.Postgres)
 	if err != nil {
 		logger.Fatal("Database connection failed", err)
 	}
-	defer db.Conn.Close()
+	defer db.Close()
 
-	// Run migration
-	if err := postgres.RunMigrations(&cfg.Postgres); err != nil {
+	// Run database migrations
+	if err := database.RunMigrations(&cfg.Postgres); err != nil {
 		logger.Fatal("Migration failed", err)
 	}
 
-	// Connect Redis
-	rc, err := redis.NewClient(&cfg.Redis)
+	// Initialize cache connection
+	redisCache, err := cache.NewRedisCache(&cfg.Redis)
 	if err != nil {
 		logger.Fatal("Redis connection failed", err)
 	}
-	defer rc.Close()
+	defer redisCache.Close()
 
-	// Initialize container with all dependencies
-	c := di.NewContainer(db.Conn, rc.Client, cfg)
+	// Wire all dependencies (Composition Root)
+	c := di.NewContainer(db.Conn, redisCache.Client, cfg)
 
 	// HTTP server
 	r := httpapi.NewRouter(c)

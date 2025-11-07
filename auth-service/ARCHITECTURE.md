@@ -11,7 +11,7 @@ auth-service/
 ├── cmd/                        # Application entry points
 │   └── api/                    # HTTP API server
 ├── internal/
-│   ├── domain/                 # Enterprise Business Rules (Layer 1)
+│   ├── domain/                 # Layer 1: Enterprise Business Rules
 │   │   ├── entity/             # Domain entities
 │   │   ├── valueobject/        # Value objects and domain errors
 │   │   ├── repository/         # Repository interfaces (ports)
@@ -22,37 +22,70 @@ auth-service/
 │   │       ├── otp/
 │   │       └── session/
 │   │
-│   ├── usecase/                # Application Business Rules (Layer 2)
+│   ├── usecase/                # Layer 2: Application Business Rules
 │   │   ├── login/
 │   │   ├── register/
 │   │   ├── verify_otp/
 │   │   ├── forgot_password/
 │   │   └── refresh_token/
 │   │
-│   ├── adapter/                # Interface Adapters (Layer 3)
+│   ├── adapter/                # Layer 3: Interface Adapters
 │   │   ├── http/               # HTTP delivery (handlers, DTOs, middleware)
 │   │   ├── persistence/        # Data persistence adapters
-│   │   │   └── postgres/
+│   │   │   └── postgres/       # PostgreSQL repository implementations
 │   │   ├── cache/              # Caching adapters
-│   │   │   └── redis/
+│   │   │   └── redis/          # Redis service implementations
 │   │   ├── mailer/             # Email delivery adapters
-│   │   │   └── smtp/
+│   │   │   └── smtp/           # SMTP email implementation
 │   │   ├── auth/               # Authentication adapters
-│   │   │   └── jwt/
+│   │   │   └── jwt/            # JWT token implementation
 │   │   └── security/           # Security adapters
-│   │       └── bcrypt/
+│   │       └── bcrypt/         # Bcrypt password implementation
 │   │
-│   ├── app/                    # Composition Root
-│   │   └── container.go        # Dependency injection wiring
+│   ├── infrastructure/         # Layer 4: Frameworks & Drivers
+│   │   ├── container/          # Dependency injection (Composition Root)
+│   │   ├── database/           # Database connection & migrations
+│   │   └── cache/              # Cache connection setup
 │   │
-│   ├── config/                 # Configuration
+│   ├── config/                 # Configuration loading
 │   └── shared/                 # Shared utilities (logger, response)
 │
 ├── migrations/                 # Database migrations
 └── tests/                      # Tests
 ```
 
-## Layer Descriptions
+## The 4 Layers of Clean Architecture
+
+This service explicitly implements all 4 layers of Clean Architecture:
+
+### **Layer 1: Entities (Enterprise Business Rules)**
+
+- Core business logic that would be the same across all applications
+- No dependencies on any other layer
+- Location: `internal/domain/`
+
+### **Layer 2: Use Cases (Application Business Rules)**
+
+- Application-specific business rules
+- Orchestrates the flow of data to/from entities
+- Depends only on Layer 1
+- Location: `internal/usecase/`
+
+### **Layer 3: Interface Adapters**
+
+- Converts data between use cases and external systems
+- Implements domain interfaces (ports)
+- Depends on Layers 1 & 2
+- Location: `internal/adapter/`
+
+### **Layer 4: Frameworks & Drivers**
+
+- External frameworks, tools, and delivery mechanisms
+- Database drivers, web frameworks, external libraries
+- Depends on all inner layers
+- Locations: `cmd/`, `internal/infrastructure/`, `migrations/`
+
+## Detailed Layer Descriptions
 
 ### Layer 1: Domain (Enterprise Business Rules)
 
@@ -160,34 +193,129 @@ Implements `password.Service` using bcrypt.
 
 - `password_service.go` - Password hashing and validation
 
-### Composition Root
+### Layer 4: Infrastructure (Frameworks & Drivers)
 
-**Location**: `internal/app/container.go`
+**Location**: `internal/infrastructure/`, `cmd/`, `migrations/`
 
-Dependency injection container that wires all components together. This is the only place where concrete implementations are instantiated and injected into use cases.
+The outermost layer containing framework-specific code, external tool setup, and the composition root.
+
+#### Container (Composition Root)
+
+**Location**: `internal/infrastructure/container/`
+
+Dependency injection container that wires all components together. This is the **only place** where concrete implementations are instantiated and injected into use cases.
+
+**Files**:
+
+- `container.go` - DI container with `NewContainer()` function
+
+**Responsibilities**:
+
+- Instantiate all adapters (Layer 3)
+- Wire adapters into use cases (Layer 2)
+- Create HTTP handlers with use cases
+- Return container with all dependencies resolved
+
+#### Database Infrastructure
+
+**Location**: `internal/infrastructure/database/`
+
+Framework-level database connection and migration management.
+
+**Files**:
+
+- `postgres.go` - PostgreSQL connection setup with connection pooling
+- `migrate.go` - Database migration runner using golang-migrate
+
+**Responsibilities**:
+
+- Establish database connections
+- Configure connection pools
+- Run database migrations
+- Provide `*sql.DB` to adapters
+
+#### Cache Infrastructure
+
+**Location**: `internal/infrastructure/cache/`
+
+Framework-level cache connection management.
+
+**Files**:
+
+- `redis.go` - Redis connection setup and health check
+
+**Responsibilities**:
+
+- Establish Redis connections
+- Configure Redis client
+- Provide `*redis.Client` to adapters
+
+#### Entry Point
+
+**Location**: `cmd/api/main.go`
+
+Application entry point that bootstraps the entire system.
+
+**Responsibilities**:
+
+- Load configuration
+- Initialize logger
+- Set up database connection (Layer 4)
+- Run migrations (Layer 4)
+- Set up cache connection (Layer 4)
+- Create DI container (Layer 4)
+- Start HTTP server (Layer 4)
 
 ## Dependency Rule
 
 Dependencies flow **inward only**:
 
 ```
-Frameworks & Drivers (cmd, migrations)
-        ↓
-Interface Adapters (adapter/)
-        ↓
-Application Business Rules (usecase/)
-        ↓
-Enterprise Business Rules (domain/)
+Layer 4: Frameworks & Drivers
+    (cmd/, infrastructure/, migrations/)
+            ↓
+Layer 3: Interface Adapters
+    (adapter/)
+            ↓
+Layer 2: Application Business Rules
+    (usecase/)
+            ↓
+Layer 1: Enterprise Business Rules
+    (domain/)
 ```
 
-- **Domain** has no dependencies
-- **Use Cases** depend only on **Domain**
-- **Adapters** depend on **Domain** (implement interfaces)
-- **Main/Container** depends on everything (wires it all together)
+**Key Principle**: Inner layers know nothing about outer layers.
+
+- **Domain** (Layer 1) has zero dependencies
+- **Use Cases** (Layer 2) depend only on **Domain**
+- **Adapters** (Layer 3) depend on **Domain** (implement interfaces)
+- **Infrastructure** (Layer 4) depends on everything (wires it all together)
 
 ## Key Design Decisions
 
-### 1. Capability-Based Service Packages
+### 1. Explicit Layer 4 (Infrastructure)
+
+We've made Layer 4 explicit with the `internal/infrastructure/` folder to:
+
+- **Clarify responsibilities**: Framework setup code is clearly separated from business logic
+- **Improve maintainability**: Easy to find where connections and DI happen
+- **Follow Clean Architecture strictly**: All 4 layers are visible in the folder structure
+- **Enable testing**: Infrastructure can be mocked or replaced for testing
+
+**What belongs in infrastructure/**:
+
+- Database connection setup (not queries)
+- Cache connection setup (not cache operations)
+- Dependency injection container
+- Framework initialization code
+
+**What belongs in adapter/**:
+
+- Business logic implementations (repositories, services)
+- Data transformation (DTOs, mappers)
+- Protocol-specific handlers (HTTP, gRPC)
+
+### 2. Capability-Based Service Packages
 
 Domain services are organized by capability with concise names:
 
@@ -196,7 +324,7 @@ Domain services are organized by capability with concise names:
 
 This reduces naming stutter and improves readability.
 
-### 2. Technology-First Adapter Naming
+### 3. Technology-First Adapter Naming
 
 Adapters are named after the technology they use:
 
@@ -206,7 +334,7 @@ Adapters are named after the technology they use:
 
 This makes it easy to add alternative implementations (e.g., `adapter/persistence/mongodb/`).
 
-### 3. Standardized Use Case Structure
+### 4. Standardized Use Case Structure
 
 Every use case follows the same pattern:
 
@@ -215,7 +343,7 @@ Every use case follows the same pattern:
 - `Usecase` interface with `Execute(ctx, input) (*output, error)`
 - Constructor `New<Feature>Usecase(...) Usecase`
 
-### 4. Import Aliases for Clarity
+### 5. Import Aliases for Clarity
 
 When package names conflict, use descriptive aliases:
 

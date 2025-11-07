@@ -3,7 +3,7 @@ package route
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/thanhnamdk2710/auth-service/internal/adapter/http/handler"
-	di "github.com/thanhnamdk2710/auth-service/internal/app"
+	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/di"
 )
 
 func InitRoutes(r *gin.Engine, c *di.Container) {
