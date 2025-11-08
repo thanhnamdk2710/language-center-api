@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/thanhnamdk2710/auth-service/internal/domain/entity"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/repository"
@@ -55,30 +54,35 @@ func (r *userRepository) Create(ctx context.Context, user *entity.User) error {
 	return r.db.QueryRowContext(ctx, query, user.Email, user.Password, valueobject.UserStatusPending).Scan(&user.ID)
 }
 
-func (r *userRepository) IncrementFailedAttempts(ctx context.Context, userID string) error {
-	query := `UPDATE users SET failed_login_attemps = failed_login_attemps + 1, updated_at = NOW() WHERE id = $1`
-	_, err := r.db.ExecContext(ctx, query, userID)
-	if err != nil {
-		return fmt.Errorf("failed to increment failed attempts: %w", err)
-	}
-	return nil
-}
+func (r *userRepository) Update(ctx context.Context, user *entity.User) error {
+	query := `
+		UPDATE users 
+		SET 
+			email = $1,
+			password = $2,
+			status = $3,
+			email_verified_at = $4,
+			failed_login_attempts = $5,
+			locked_until = $6,
+			updated_at = NOW()
+		WHERE id = $7
+	`
 
-func (r *userRepository) ResetFailedAttempts(ctx context.Context, userID string) error {
-	query := `UPDATE users SET failed_login_attemps = 0, updated_at = NOW() WHERE id = $1`
-	_, err := r.db.ExecContext(ctx, query, userID)
-	if err != nil {
-		return fmt.Errorf("failed to reset failed attempts: %w", err)
-	}
-	return nil
-}
+	_, err := r.db.ExecContext(
+		ctx,
+		query,
+		user.Email.String(),
+		user.Password,
+		user.Status,
+		user.EmailVerifiedAt,
+		user.FailedLoginAttempts,
+		user.LockedUntil,
+		user.ID.String(),
+	)
 
-func (r *userRepository) LockAccount(ctx context.Context, userID string, duration time.Duration) error {
-	lockedUntil := time.Now().Add(duration)
-	query := `UPDATE users SET locked_until = $1, updated_at = NOW() WHERE id = $2`
-	_, err := r.db.ExecContext(ctx, query, lockedUntil, userID)
 	if err != nil {
-		return fmt.Errorf("failed to lock account: %w", err)
+		return fmt.Errorf("failed to update user: %w", err)
 	}
+
 	return nil
 }

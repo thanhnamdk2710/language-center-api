@@ -91,6 +91,6 @@ func (u *User) CanLogin() error {
 	return nil
 }
 
-func (u *User) VerifyPassword(hashPassword string, passwordSvc password.Service) bool {
-	return passwordSvc.Verify(hashPassword, u.Password)
+func (u *User) VerifyPassword(plainPassword string, passwordSvc password.Service) bool {
+	return passwordSvc.Verify(plainPassword, u.Password)
 }

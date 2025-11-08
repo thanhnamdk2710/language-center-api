@@ -48,42 +48,28 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, valueobject.ErrInvalidCredentials
 	}
 
-	// Check email verification and account status
-	if user.Status == valueobject.UserStatusPending {
-		return nil, valueobject.ErrEmailNotVerified
-	}
-	if user.Status == valueobject.UserStatusDisabled {
-		return nil, valueobject.ErrAccountDisabled
-	}
-
-	// Check if account is locked
-	if user.LockedUntil != nil && time.Now().Before(*user.LockedUntil) {
-		return nil, valueobject.ErrAccountLocked
+	if err := user.CanLogin(); err != nil {
+		return nil, err
 	}
 
 	// Verify password
-	validPassword := s.passwordSvc.Verify(input.Password, user.Password)
-	if !validPassword {
-		// Increment failed attemps
-		if err := s.userRepo.IncrementFailedAttempts(ctx, user.ID.String()); err != nil {
-			// Log error but continue
-		}
-
-		// Lock account after 5 failed attempts
-		if user.FailedLoginAttempts >= 4 { // Will be 5 after increment
-			lockDuration := 30 * time.Minute
-			if err := s.userRepo.LockAccount(ctx, user.ID.String(), lockDuration); err != nil {
+	if !user.VerifyPassword(input.Password, s.passwordSvc) {
+		if err := user.RecordFailedLogin(); err != nil {
+			if updateErr := s.userRepo.Update(ctx, user); updateErr != nil {
 				// Log error
 			}
 			return nil, valueobject.ErrAccountLocked
 		}
 
+		if err := s.userRepo.Update(ctx, user); err != nil {
+			// Log error
+		}
 		return nil, valueobject.ErrInvalidCredentials
 	}
 
 	// Reset failed attempts on successful login
 	if user.FailedLoginAttempts > 0 {
-		if err := s.userRepo.ResetFailedAttempts(ctx, user.ID.String()); err != nil {
+		if err := s.userRepo.Update(ctx, user); err != nil {
 			// Log error but continue
 		}
 	}
