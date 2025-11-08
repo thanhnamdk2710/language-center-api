@@ -100,12 +100,11 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	}
 
 	// Store refresh token session
-	session := &entity.Session{
-		UserID:       user.ID.String(),
-		RefreshToken: refreshToken,
-		ExpiresAt:    time.Now().Add(7 * 24 * time.Hour),
-		CreatedAt:    time.Now(),
+	session, err := entity.NewSession(user.ID, refreshToken, time.Now().Add(7*24*time.Hour))
+	if err != nil {
+		return nil, fmt.Errorf("failed to initial refresh token: %w", err)
 	}
+
 	if err := s.sessionSvc.Store(ctx, session); err != nil {
 		// Log error but continue
 	}

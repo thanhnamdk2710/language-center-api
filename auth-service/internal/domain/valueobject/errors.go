@@ -13,8 +13,12 @@ var (
 
 	// Token
 	ErrInvalidToken = errors.New("invalid token")
-	ErrOTPExpired   = errors.New("OTP has expired")
-	ErrOTPInvalid   = errors.New("OTP is invalid")
+	ErrOTPExpired   = errors.New("otp has expired")
+	ErrOTPInvalid   = errors.New("otp is invalid")
+
+	// Session
+	ErrSessionExpired = errors.New("session has expired")
+	ErrSessionInvalid = errors.New("invalid session: empty refresh token")
 
 	// Password
 	ErrInvalidPassword = errors.New("password must contain uppercase, lowercase, number, and special character")
