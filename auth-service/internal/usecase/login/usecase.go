@@ -65,14 +65,14 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	validPassword := s.passwordSvc.Verify(input.Password, user.Password)
 	if !validPassword {
 		// Increment failed attemps
-		if err := s.userRepo.IncrementFailedAttempts(ctx, user.ID); err != nil {
+		if err := s.userRepo.IncrementFailedAttempts(ctx, user.ID.String()); err != nil {
 			// Log error but continue
 		}
 
 		// Lock account after 5 failed attempts
 		if user.FailedLoginAttempts >= 4 { // Will be 5 after increment
 			lockDuration := 30 * time.Minute
-			if err := s.userRepo.LockAccount(ctx, user.ID, lockDuration); err != nil {
+			if err := s.userRepo.LockAccount(ctx, user.ID.String(), lockDuration); err != nil {
 				// Log error
 			}
 			return nil, valueobject.ErrAccountLocked
@@ -83,25 +83,25 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 
 	// Reset failed attempts on successful login
 	if user.FailedLoginAttempts > 0 {
-		if err := s.userRepo.ResetFailedAttempts(ctx, user.ID); err != nil {
+		if err := s.userRepo.ResetFailedAttempts(ctx, user.ID.String()); err != nil {
 			// Log error but continue
 		}
 	}
 
 	// Generate tokens
-	accessToken, err := s.tokenSvc.GenerateAccessToken(user.ID)
+	accessToken, err := s.tokenSvc.GenerateAccessToken(user.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate access token: %w", err)
 	}
 
-	refreshToken, err := s.tokenSvc.GenerateRefreshToken(user.ID)
+	refreshToken, err := s.tokenSvc.GenerateRefreshToken(user.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
 
 	// Store refresh token session
 	session := &entity.Session{
-		UserID:       user.ID,
+		UserID:       user.ID.String(),
 		RefreshToken: refreshToken,
 		ExpiresAt:    time.Now().Add(7 * 24 * time.Hour),
 		CreatedAt:    time.Now(),
@@ -111,7 +111,7 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	}
 
 	return &Output{
-		UserID:       user.ID,
+		UserID:       user.ID.String(),
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil

@@ -59,10 +59,9 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	}
 
 	// Create user
-	user := &entity.User{
-		Email:    input.Email,
-		Password: passwordHash,
-		Status:   valueobject.UserStatusPending,
+	user, err := entity.NewUser(input.Email, passwordHash)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initial user: %w", err)
 	}
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
@@ -70,15 +69,15 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	}
 
 	// Generate OTP
-	otp, err := s.otpSvc.Generate(ctx, user.Email)
+	otp, err := s.otpSvc.Generate(ctx, user.Email.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate OTP: %w", err)
 	}
 
 	// Send verification email
-	if err := s.emailSvc.SendVerificationEmail(user.Email, otp); err != nil {
-		return &Output{UserID: user.ID}, nil
+	if err := s.emailSvc.SendVerificationEmail(user.Email.String(), otp); err != nil {
+		return &Output{UserID: user.ID.String()}, nil
 	}
 
-	return &Output{UserID: user.ID}, nil
+	return &Output{UserID: user.ID.String()}, nil
 }

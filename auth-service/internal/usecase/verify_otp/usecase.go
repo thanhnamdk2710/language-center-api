@@ -48,7 +48,7 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	}
 
 	// Update user status to active
-	if err := s.userRepo.VerifyEmail(ctx, user.ID); err != nil {
+	if err := s.userRepo.VerifyEmail(ctx, user.ID.String()); err != nil {
 		return nil, fmt.Errorf("failed to verify email: %w", err)
 	}
 
@@ -59,18 +59,18 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	}
 
 	// Generate tokens
-	accessToken, err := s.tokenSvc.GenerateAccessToken(user.ID)
+	accessToken, err := s.tokenSvc.GenerateAccessToken(user.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate access token: %w", err)
 	}
 
-	refreshToken, err := s.tokenSvc.GenerateRefreshToken(user.ID)
+	refreshToken, err := s.tokenSvc.GenerateRefreshToken(user.ID.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
 
 	return &Output{
-		UserID:       user.ID,
+		UserID:       user.ID.String(),
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
