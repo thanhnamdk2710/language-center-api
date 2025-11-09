@@ -46,6 +46,6 @@ func (h *RegisterHandler) Register(c *gin.Context) {
 
 	response.Success(c, http.StatusCreated, gin.H{
 		"user_id": output.UserID,
-		"message": "User registered successfully",
+		"message": output.Message,
 	})
 }

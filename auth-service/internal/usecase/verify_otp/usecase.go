@@ -47,9 +47,12 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, valueobject.ErrUserNotFound
 	}
 
-	// Update user status to active
-	if err := s.userRepo.VerifyEmail(ctx, user.ID.String()); err != nil {
-		return nil, fmt.Errorf("failed to verify email: %w", err)
+	if err := user.Activate(); err != nil {
+		return nil, err
+	}
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return nil, err
 	}
 
 	// Delete OTP after successful verification
