@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/thanhnamdk2710/auth-service/internal/domain/service/password"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 )
 
@@ -89,8 +88,4 @@ func (u *User) CanLogin() error {
 		return valueobject.ErrAccountLocked
 	}
 	return nil
-}
-
-func (u *User) VerifyPassword(plainPassword string, passwordSvc password.Service) bool {
-	return passwordSvc.Verify(plainPassword, u.Password)
 }

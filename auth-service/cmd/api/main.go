@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	httpapi "github.com/thanhnamdk2710/auth-service/internal/adapter/http"
 	"github.com/thanhnamdk2710/auth-service/internal/config"
-	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/cache"
-	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/database"
+	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/cache/redis"
+	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/database/postgres"
 	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/di"
+	httpapi "github.com/thanhnamdk2710/auth-service/internal/infrastructure/http"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 
@@ -16,19 +16,19 @@ func main() {
 	logger.InitLogger(cfg.AppName, "dev")
 
 	// Initialize database connection
-	db, err := database.NewPostgresDB(&cfg.Postgres)
+	db, err := postgres.NewPostgresDB(&cfg.Postgres)
 	if err != nil {
 		logger.Fatal("Database connection failed", err)
 	}
 	defer db.Close()
 
 	// Run database migrations
-	if err := database.RunMigrations(&cfg.Postgres); err != nil {
+	if err := postgres.RunMigrations(&cfg.Postgres); err != nil {
 		logger.Fatal("Migration failed", err)
 	}
 
 	// Initialize cache connection
-	redisCache, err := cache.NewRedisCache(&cfg.Redis)
+	redisCache, err := redis.NewClient(&cfg.Redis)
 	if err != nil {
 		logger.Fatal("Redis connection failed", err)
 	}

@@ -6,10 +6,8 @@ import (
 	"time"
 
 	"github.com/thanhnamdk2710/auth-service/internal/domain/entity"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/port"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/repository"
-	"github.com/thanhnamdk2710/auth-service/internal/domain/service/password"
-	"github.com/thanhnamdk2710/auth-service/internal/domain/service/session"
-	"github.com/thanhnamdk2710/auth-service/internal/domain/service/token"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 )
 
@@ -19,16 +17,16 @@ type Usecase interface {
 
 type service struct {
 	userRepo    repository.UserRepository
-	passwordSvc password.Service
-	tokenSvc    token.Service
-	sessionSvc  session.Service
+	passwordSvc port.PasswordService
+	tokenSvc    port.TokenService
+	sessionSvc  port.SessionService
 }
 
 func NewLoginUsecase(
 	userRepo repository.UserRepository,
-	passwordSvc password.Service,
-	tokenSvc token.Service,
-	sessionSvc session.Service,
+	passwordSvc port.PasswordService,
+	tokenSvc port.TokenService,
+	sessionSvc port.SessionService,
 ) Usecase {
 	return &service{
 		userRepo:    userRepo,
@@ -53,7 +51,7 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	}
 
 	// Verify password
-	if !user.VerifyPassword(input.Password, s.passwordSvc) {
+	if !s.passwordSvc.Verify(input.Password, user.Password) {
 		if err := user.RecordFailedLogin(); err != nil {
 			if updateErr := s.userRepo.Update(ctx, user); updateErr != nil {
 				// Log error

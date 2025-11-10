@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/thanhnamdk2710/auth-service/internal/domain/port"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/repository"
-	"github.com/thanhnamdk2710/auth-service/internal/domain/service/otp"
-	"github.com/thanhnamdk2710/auth-service/internal/domain/service/token"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 )
 
@@ -16,14 +15,14 @@ type Usecase interface {
 
 type service struct {
 	userRepo repository.UserRepository
-	otpSvc   otp.Service
-	tokenSvc token.Service
+	otpSvc   port.OTPService
+	tokenSvc port.TokenService
 }
 
 func NewVerifyOTPUsecase(
 	userRepo repository.UserRepository,
-	otpSvc otp.Service,
-	tokenSvc token.Service,
+	otpSvc port.OTPService,
+	tokenSvc port.TokenService,
 ) Usecase {
 	return &service{
 		userRepo: userRepo,

@@ -5,10 +5,8 @@ import (
 	"errors"
 
 	"github.com/thanhnamdk2710/auth-service/internal/domain/entity"
+	"github.com/thanhnamdk2710/auth-service/internal/domain/port"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/repository"
-	"github.com/thanhnamdk2710/auth-service/internal/domain/service/email"
-	"github.com/thanhnamdk2710/auth-service/internal/domain/service/otp"
-	"github.com/thanhnamdk2710/auth-service/internal/domain/service/password"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
@@ -19,16 +17,16 @@ type Usecase interface {
 
 type service struct {
 	userRepo    repository.UserRepository
-	passwordSvc password.Service
-	emailSvc    email.Service
-	otpSvc      otp.Service
+	passwordSvc port.PasswordService
+	emailSvc    port.EmailService
+	otpSvc      port.OTPService
 }
 
 func NewRegisterUsecase(
 	userRepo repository.UserRepository,
-	passwordSvc password.Service,
-	emailSvc email.Service,
-	otpSvc otp.Service,
+	passwordSvc port.PasswordService,
+	emailSvc port.EmailService,
+	otpSvc port.OTPService,
 ) Usecase {
 	return &service{
 		userRepo:    userRepo,
