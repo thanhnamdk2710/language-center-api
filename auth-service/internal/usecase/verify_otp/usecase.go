@@ -3,6 +3,7 @@ package verify_otp
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/thanhnamdk2710/auth-service/internal/domain/port"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/repository"
@@ -46,7 +47,7 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, valueobject.ErrUserNotFound
 	}
 
-	if err := user.Activate(); err != nil {
+	if err := user.Activate(time.Now()); err != nil {
 		return nil, err
 	}
 

@@ -6,6 +6,7 @@ var (
 	// User
 	ErrUserAlreadyExists  = errors.New("user already exists")
 	ErrUserNotFound       = errors.New("user not found")
+	ErrUserNotInPending   = errors.New("user is not in pending status")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrEmailNotVerified   = errors.New("email not verified")
 	ErrAccountDisabled    = errors.New("account has been disabled")

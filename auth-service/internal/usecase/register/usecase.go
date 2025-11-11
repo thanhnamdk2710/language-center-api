@@ -3,6 +3,7 @@ package register
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/thanhnamdk2710/auth-service/internal/domain/entity"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/port"
@@ -87,7 +88,13 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	}
 
 	// Create user
-	user, err := entity.NewUser(input.Email, passwordHash)
+	email, err := valueobject.NewEmail(input.Email)
+	if err != nil {
+		logger.Error("invalid email", err)
+		return nil, errors.New("registration failed, please try again later")
+	}
+
+	user, err := entity.NewUser(email, passwordHash, time.Now())
 	if err != nil {
 		logger.Error("failed to create user entity", err)
 		return nil, errors.New("registration failed, please try again later")

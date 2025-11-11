@@ -9,6 +9,7 @@ import (
 	"github.com/thanhnamdk2710/auth-service/internal/domain/port"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/repository"
 	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
+	"github.com/thanhnamdk2710/auth-service/internal/shared/logger"
 )
 
 type Usecase interface {
@@ -46,21 +47,23 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, valueobject.ErrInvalidCredentials
 	}
 
-	if err := user.CanLogin(); err != nil {
+	now := time.Now()
+
+	if err := user.ValidateLoginEligibility(now); err != nil {
 		return nil, err
 	}
 
 	// Verify password
 	if !s.passwordSvc.Verify(input.Password, user.Password) {
-		if err := user.RecordFailedLogin(); err != nil {
+		if isLocked := user.RecordFailedLogin(now); isLocked {
 			if updateErr := s.userRepo.Update(ctx, user); updateErr != nil {
-				// Log error
+				logger.Error("failed to update user", updateErr)
 			}
 			return nil, valueobject.ErrAccountLocked
 		}
 
 		if err := s.userRepo.Update(ctx, user); err != nil {
-			// Log error
+			logger.Error("failed to update user", err)
 		}
 		return nil, valueobject.ErrInvalidCredentials
 	}
@@ -68,7 +71,7 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	// Reset failed attempts on successful login
 	if user.FailedLoginAttempts > 0 {
 		if err := s.userRepo.Update(ctx, user); err != nil {
-			// Log error but continue
+			logger.Error("failed to update user", err)
 		}
 	}
 
@@ -84,12 +87,13 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 	}
 
 	// Store refresh token session
-	session, err := entity.NewSession(user.ID, refreshToken, time.Now().Add(7*24*time.Hour))
+	session, err := entity.NewSession(user.ID, refreshToken, now.Add(7*24*time.Hour))
 	if err != nil {
 		return nil, fmt.Errorf("failed to initial refresh token: %w", err)
 	}
 
 	if err := s.sessionSvc.Store(ctx, session); err != nil {
+		logger.Error("failed to store session", err)
 		// Log error but continue
 	}
 
