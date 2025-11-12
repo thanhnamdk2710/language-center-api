@@ -69,7 +69,7 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 				Message: "Verification email resent. Please check your mail.",
 			}, nil
 		case valueobject.UserStatusActive:
-			return nil, valueobject.ErrUserAlreadyExists
+			return nil, valueobject.ErrEmailAlreadyExists
 		case valueobject.UserStatusDisabled:
 			return nil, errors.New("your account has been disabled, please contact support")
 		}

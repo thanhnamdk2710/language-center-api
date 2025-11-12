@@ -4,7 +4,7 @@ import "errors"
 
 var (
 	// User
-	ErrUserAlreadyExists  = errors.New("user already exists")
+	ErrEmailAlreadyExists = errors.New("email already exists")
 	ErrUserNotFound       = errors.New("user not found")
 	ErrUserNotInPending   = errors.New("user is not in pending status")
 	ErrInvalidCredentials = errors.New("invalid credentials")

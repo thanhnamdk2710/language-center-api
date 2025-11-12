@@ -1,17 +1,16 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
 	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/http/dto"
 	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/http/response"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/register"
 )
 
 type RegisterHandler struct {
+	BaseHandler
 	usecase register.Usecase
 }
 
@@ -22,7 +21,11 @@ func NewRegisterHandler(u register.Usecase) *RegisterHandler {
 }
 
 func (h *RegisterHandler) Register(c *gin.Context) {
-	req := c.MustGet("requestBody").(dto.RegisterRequest)
+	var req dto.RegisterRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.HandleError(c, err)
+		return
+	}
 
 	input := register.Input{
 		Email:    req.Email,
@@ -31,16 +34,7 @@ func (h *RegisterHandler) Register(c *gin.Context) {
 
 	output, err := h.usecase.Execute(c.Request.Context(), input)
 	if err != nil {
-		// Map domain errors to HTTP errors
-		if errors.Is(err, valueobject.ErrUserAlreadyExists) {
-			response.Error(c, http.StatusConflict, "USER_EXISTS", err.Error())
-			return
-		}
-		if errors.Is(err, valueobject.ErrInvalidPassword) {
-			response.Error(c, http.StatusConflict, "INVALID_PASSWORD", err.Error())
-			return
-		}
-		response.Error(c, http.StatusInternalServerError, "SERVER_ERROR", err.Error())
+		h.HandleError(c, err)
 		return
 	}
 

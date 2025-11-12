@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func ConvertValidationErrors(err error) map[string]string {
+func ParseValidationErrors(err error) map[string]string {
 	errors := make(map[string]string)
 
 	if errs, ok := err.(validator.ValidationErrors); ok {
