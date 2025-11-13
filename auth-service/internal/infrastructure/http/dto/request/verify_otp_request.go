@@ -1,4 +1,4 @@
-package dto
+package request
 
 type VerifyOTPRequest struct {
 	Email string `json:"email" binding:"required,email"`
