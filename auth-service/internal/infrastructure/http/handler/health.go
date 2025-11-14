@@ -7,10 +7,10 @@ import (
 	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/http/response"
 )
 
-func HealthCheck() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		response.Success(c, http.StatusOK, gin.H{
-			"message": "OK",
-		})
-	}
+type HealthHandler struct{}
+
+func (h *HealthHandler) Check(c *gin.Context) {
+	response.Success(c, http.StatusOK, gin.H{
+		"message": "OK",
+	})
 }

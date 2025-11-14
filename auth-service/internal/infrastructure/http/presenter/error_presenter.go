@@ -30,19 +30,19 @@ func NewErrorPresenter() *ErrorPresenter {
 			valueobject.ErrAccountDisabled:    {http.StatusUnauthorized, "ACCOUNT_DISABLED", "Your account has been disabled", nil},
 			valueobject.ErrAccountLocked:      {http.StatusUnauthorized, "ACCOUNT_LOCKED", "Your account locked due to too many failed attempts", nil},
 			valueobject.ErrInvalidCredentials: {http.StatusUnauthorized, "INVALID_CREDENTIALS", "Invalid email or password", nil},
-			
+
 			// Registration errors
 			valueobject.ErrEmailAlreadyExists: {http.StatusConflict, "EMAIL_EXISTS", "Email already exists", nil},
 			valueobject.ErrInvalidPassword:    {http.StatusBadRequest, "INVALID_PASSWORD", "Password must contain uppercase, lowercase, number, and special character", nil},
-			
+
 			// OTP errors
 			valueobject.ErrOTPExpired: {http.StatusUnauthorized, "OTP_EXPIRED", "OTP has expired", nil},
 			valueobject.ErrOTPInvalid: {http.StatusUnauthorized, "OTP_INVALID", "Invalid OTP", nil},
-			
+
 			// User errors
 			valueobject.ErrUserNotFound:     {http.StatusNotFound, "USER_NOT_FOUND", "User not found", nil},
 			valueobject.ErrUserNotInPending: {http.StatusBadRequest, "USER_NOT_IN_PENDING", "User is not in pending status", nil},
-			
+
 			// Session errors
 			valueobject.ErrSessionExpired: {http.StatusUnauthorized, "SESSION_EXPIRED", "Session has expired", nil},
 			valueobject.ErrSessionInvalid: {http.StatusUnauthorized, "SESSION_INVALID", "Invalid session", nil},

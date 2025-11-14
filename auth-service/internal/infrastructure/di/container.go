@@ -12,20 +12,14 @@ import (
 	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/http/handler"
 	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/mailer/smtp"
 	"github.com/thanhnamdk2710/auth-service/internal/infrastructure/security/bcrypt"
-	"github.com/thanhnamdk2710/auth-service/internal/usecase/forgot_password"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/login"
-	"github.com/thanhnamdk2710/auth-service/internal/usecase/refresh_token"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/register"
 	"github.com/thanhnamdk2710/auth-service/internal/usecase/verify_otp"
 )
 
-// Container holds all HTTP handlers for dependency injection
 type Container struct {
-	RegisterHandler       *handler.RegisterHandler
-	VerifyOTPHandler      *handler.VerifyOTPHandler
-	LoginHandler          *handler.LoginHandler
-	ForgotPasswordHandler *handler.ForgotPasswordHandler
-	RefreshTokenHandler   *handler.RefreshTokenHandler
+	HealthHandler *handler.HealthHandler
+	AuthHandler   *handler.AuthHandler
 }
 
 // NewContainer creates and wires all dependencies
@@ -46,21 +40,13 @@ func NewContainer(db *sql.DB, redisClient *goredis.Client, cfg *config.Config) *
 	registerUC := register.NewRegisterUsecase(userRepo, passwordSvc, emailSvc, otpSvc)
 	verifyOTPUC := verify_otp.NewVerifyOTPUsecase(userRepo, otpSvc, tokenSvc)
 	loginUC := login.NewLoginUsecase(userRepo, passwordSvc, tokenSvc, sessionSvc)
-	forgotPasswordUC := forgot_password.NewForgotPasswordUsecase()
-	refreshTokenUC := refresh_token.NewRefreshTokenUsecase()
 
 	// HTTP Handlers - Delivery mechanism
-	registerHandler := handler.NewRegisterHandler(registerUC)
-	verifyOTPHandler := handler.NewVerifyOTPHandler(verifyOTPUC)
-	loginHandler := handler.NewLoginHandler(loginUC)
-	forgotPasswordHandler := handler.NewForgotPasswordHandler(forgotPasswordUC)
-	refreshTokenHandler := handler.NewRefreshTokenHandler(refreshTokenUC)
+	healthHandler := &handler.HealthHandler{}
+	authHandler := handler.NewAuthHandler(registerUC, verifyOTPUC, loginUC)
 
 	return &Container{
-		RegisterHandler:       registerHandler,
-		VerifyOTPHandler:      verifyOTPHandler,
-		LoginHandler:          loginHandler,
-		ForgotPasswordHandler: forgotPasswordHandler,
-		RefreshTokenHandler:   refreshTokenHandler,
+		HealthHandler: healthHandler,
+		AuthHandler:   authHandler,
 	}
 }
