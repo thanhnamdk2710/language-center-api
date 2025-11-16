@@ -49,7 +49,7 @@ func (s *service) Execute(ctx context.Context, input Input) (*Output, error) {
 
 	now := time.Now()
 
-	if err := user.ValidateLoginEligibility(now); err != nil {
+	if err := user.EnsureCanLogin(now); err != nil {
 		return nil, err
 	}
 

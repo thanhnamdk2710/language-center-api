@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"errors"
 	"time"
 
 	"github.com/thanhnamdk2710/auth-service/internal/domain/valueobject"
@@ -25,10 +24,6 @@ type User struct {
 }
 
 func NewUser(email valueobject.Email, passwordHash string, now time.Time) (*User, error) {
-	if passwordHash == "" {
-		return nil, errors.New("password hash is required")
-	}
-
 	return &User{
 		ID:                  valueobject.NewID(),
 		Email:               email,
@@ -65,12 +60,13 @@ func (u *User) RecordFailedLogin(now time.Time) bool {
 	return false
 }
 
-func (u *User) ResetFailedAttempts() {
+func (u *User) ResetFailedAttempts(now time.Time) {
 	u.FailedLoginAttempts = 0
 	u.LockedUntil = nil
+	u.UpdatedAt = now
 }
 
-func (u *User) ValidateLoginEligibility(now time.Time) error {
+func (u *User) EnsureCanLogin(now time.Time) error {
 	if u.Status == valueobject.UserStatusPending {
 		return valueobject.ErrEmailNotVerified
 	}
