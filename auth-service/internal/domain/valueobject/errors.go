@@ -9,6 +9,7 @@ var (
 	ErrUserNotInPending   = errors.New("user is not in pending status")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrEmailNotVerified   = errors.New("email not verified")
+	ErrInvalidEmail       = errors.New("invalid email format")
 	ErrAccountDisabled    = errors.New("account has been disabled")
 	ErrAccountLocked      = errors.New("account is locked due to too many failed login attempts")
 
